@@ -19,11 +19,11 @@ exec:
 
 # Uncomment to enable federation
 # federation:
-#   filename: graph/federation.go
-#   package: graph
-#   version: 2
-#   options:
-#     computed_requires: true
+# filename: graph/federation.go
+# package: graph
+# version: 1
+#   # options:
+#   computed_requires: true
 
 # Where should any generated models go?
 model:
@@ -45,11 +45,6 @@ resolver:
   dir: graph
   filename_template: "{name}.resolvers.go"
 
-# federation section
-federation:
-  filename: graph/federation.go
-  package: graph
-  version: 1
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
   # Optional: Pass in a path to a new gotpl template to use for generating resolvers
@@ -126,7 +121,7 @@ call_argument_directives_with_null: true
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-#  - "products-service/graph/model"
+#  - "users-service/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

@@ -1,4 +1,4 @@
-type Product {
+type Product @key(fields: "id") {
   id: ID!
   name: String!
   description: String!
@@ -10,6 +10,12 @@ type Product {
 type Query {
   getProduct(id: ID): Product
   getAllProducts: [Product]
+}
+
+type Mutation {
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
 }
 
 input CreateProductInput {
@@ -27,10 +33,4 @@ input UpdateProductInput {
   price: Float
   stock: Int
   category: String
-}
-
-type Mutation {
-  createProduct(input: CreateProductInput!): Product!
-  updateProduct(input: UpdateProductInput!): Product!
-  deleteProduct(id: ID!): Boolean!
 }

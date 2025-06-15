@@ -22,14 +22,16 @@ type Product struct {
 	Category    string  `json:"category"`
 }
 
+func (Product) IsEntity() {}
+
 type Query struct {
 }
 
 type UpdateProductInput struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	Stock       int32   `json:"stock"`
-	Category    string  `json:"category"`
+	ID          string   `json:"id"`
+	Name        *string  `json:"name,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Price       *float64 `json:"price,omitempty"`
+	Stock       *int32   `json:"stock,omitempty"`
+	Category    *string  `json:"category,omitempty"`
 }

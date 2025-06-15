@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"products-service/graph"
+	"orders-service/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -14,7 +14,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-const defaultPort = "8081"
+const defaultPort = "8083"
 
 func main() {
 	port := os.Getenv("PORT")

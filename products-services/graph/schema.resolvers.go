@@ -36,15 +36,26 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input model.Create
 
 // UpdateProduct is the resolver for the updateProduct field.
 func (r *mutationResolver) UpdateProduct(ctx context.Context, input model.UpdateProductInput) (*model.Product, error) {
+	fmt.Printf("UpdateProduct called with IDL %v\n", input.ID)
 	// Find the product to update
 	for i, product := range products {
+		// Only update fields that are not nil
 		if product.ID == input.ID {
-			// update everything that is provided
-			product.Name = input.Name
-			product.Description = input.Description
-			product.Price = input.Price
-			product.Stock = &input.Stock
-			product.Category = input.Category
+			if input.Name != nil{
+				product.Name =*input.Name
+			}
+			if input.Description != nil{
+				product.Description = *input.Description
+			}
+			if input.Price != nil{
+				product.Price = *input.Price
+			}
+			if input.Stock != nil{
+				product.Stock = input.Stock
+			}
+			if input.Category != nil{
+				product.Category = *input.Category
+			}
 			// Replace in slice
 			products[i] = product
 			return product, nil

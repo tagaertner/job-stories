@@ -1,0 +1,16 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String!
+  createdAt: String!
+  address: String
+  phone: String
+  isActive: Boolean!
+}
+
+type Query {
+  getUser(id: ID!): User
+  getUserByEmail(email: String!): User
+  getAllUsers: [User!]!
+}
