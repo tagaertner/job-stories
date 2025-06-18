@@ -14,11 +14,17 @@ resolver:
   type: Resolver
   package: resolvers
 
-# Configure federation scalars
+# Configure federation types properly
 models:
   _Any:
     model: interface{}
   _FieldSet:
     model: string
+  _Service:
+    fields:
+      sdl:
+        resolver: true
 
+# Skip validation to allow federation directives
 skip_validation: true
+skip_mod_tidy: true
