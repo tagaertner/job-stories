@@ -1,0 +1,24 @@
+schema:
+  - schema.graphql
+
+exec:
+  filename: generated/generated.go
+  package: generated
+
+model:
+  filename: models/models.go
+  package: models
+
+resolver:
+  filename: resolvers/resolver.go
+  type: Resolver
+  package: resolvers
+
+# Configure federation scalars
+models:
+  _Any:
+    model: interface{}
+  _FieldSet:
+    model: string
+
+skip_validation: true
