@@ -7,11 +7,11 @@ import (
 
     "github.com/99designs/gqlgen/graphql/handler"
     "github.com/99designs/gqlgen/graphql/playground"
-    "e-commerce/services/products/generated"
-    "e-commerce/services/products/resolvers"
+    "e-commerce/services/users/generated"
+    "e-commerce/services/users/resolvers"
 )
 
-const defaultPort = "4001"
+const defaultPort = "4002"
 
 func main() {
     port := os.Getenv("PORT")
@@ -31,9 +31,9 @@ func main() {
     // Health check
     http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
-        w.Write([]byte(`{"status": "healthy", "service": "products"}`))
+        w.Write([]byte(`{"status": "healthy", "service": "users"}`))
     })
 
-    log.Printf("🛍️ Products service ready at http://localhost:%s/", port)
+    log.Printf("🛍️ Users service ready at http://localhost:%s/", port)
     log.Fatal(http.ListenAndServe(":"+port, nil))
 }
