@@ -1,25 +1,25 @@
 # E-Commerce Microservices Platform
 
-A demonstration of microservices architecture using **Go** and **Node.js**, implementing an e-commerce system with GraphQL APIs.
+A demonstration of microservices architecture using **Go** and **Node.js**, and GraphQL APIs.
 
 ## Architecture
 
 ```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  🛍️ Products      │     │  👥 Users         │     │  📦 Orders        │
-│  Service          │     │  Service          │     │  Service          │
-│  Port: 4001       │     │  Port: 4002       │     │  Port: 4003       │
-│  (Go + GraphQL)   │     │  (Go + GraphQL)   │     │  (Go + GraphQL)   │
-└─────────┬────────┘     └─────────┬────────┘     └─────────┬────────┘
-          │                        │                        │
-          └────────────────────────┼────────────────────────┘
-                                   │
-                     ┌─────────────┴─────────────┐
-                     │    🚀 API Gateway         │
-                     │    Port: 4000             │
-                     │    (Node.js + Express)    │
-                     │    Unified GraphQL API    │
-                     └───────────────────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Products       │     │  Users          │     │  Orders         │
+│  Service        │     │  Service        │     │  Service        │
+│  Port: 4001     │     │  Port: 4002     │     │  Port: 4003     │
+│  (Go+GraphQL)   │     │  (Go+GraphQL)   │     │  (Go+GraphQL)   │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                  ┌──────────────┴──────────────┐
+                  │     API Gateway             │
+                  │     Port: 4000              │
+                  │     (Node.js+Express)       │
+                  │     Unified GraphQL API     │
+                  └─────────────────────────────┘
 ```
 
 ## Features
@@ -194,31 +194,17 @@ e-commerce/
 └── README.md
 ```
 
-## Development
+## Future Development
 
-### Adding New Features
+**1. Testing**
 
-**1. Update GraphQL schema:**
+**2. PostgreSQL Database Integration**
 
-```bash
-cd services/[service-name]
-# Edit schema.graphql
-gqlgen generate
-```
+**3.Advanced Queries**
 
-**2. Implement resolvers:**
+**3. Authentication & Authorization**
 
-```bash
-# Edit resolvers/resolver.go
-# Add business logic
-```
-
-**3. Update gateway:**
-
-```bash
-cd gateway
-# Edit gateway.js to proxy new queries
-```
+**4. AWS/GCP Deployment**
 
 ## Technical Details
 

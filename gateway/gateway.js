@@ -1,12 +1,13 @@
+// Import required dependencies
 const { ApolloServer } = require("apollo-server-express");
 const express = require("express");
 const fetch = require("node-fetch");
 
-// Simple proxy gateway that combines all three services
+// Main proxy gateway that combines all three services
 async function startGateway() {
   console.log("🔄 Starting E-Commerce Gateway...");
 
-  // Unified schema that combines all services
+  // GraphQL schema - defines the API struct that combines all services
   const typeDefs = `
     type Product {
       id: ID!
@@ -50,10 +51,10 @@ async function startGateway() {
     }
   `;
 
-  // Resolvers that proxy to your Go services
+  // Resolvers - func that fetch data when GraphQL queries are made
   const resolvers = {
     Query: {
-      // Product resolvers
+      // Get all products
       products: async () => {
         try {
           const response = await fetch("http://localhost:4001/query", {
@@ -71,6 +72,7 @@ async function startGateway() {
         }
       },
 
+      // Get single product by ID from Products services
       product: async (_, { id }) => {
         try {
           const response = await fetch("http://localhost:4001/query", {
@@ -88,7 +90,7 @@ async function startGateway() {
         }
       },
 
-      // User resolvers
+      // Get all users
       users: async () => {
         try {
           const response = await fetch("http://localhost:4002/query", {
@@ -106,6 +108,7 @@ async function startGateway() {
         }
       },
 
+      // Get single user by ID
       user: async (_, { id }) => {
         try {
           const response = await fetch("http://localhost:4002/query", {
@@ -123,7 +126,7 @@ async function startGateway() {
         }
       },
 
-      // Order resolvers
+      // Get all orders
       orders: async () => {
         try {
           const response = await fetch("http://localhost:4003/query", {
@@ -141,6 +144,7 @@ async function startGateway() {
         }
       },
 
+      // Get single order by ID
       order: async (_, { id }) => {
         try {
           const response = await fetch("http://localhost:4003/query", {
@@ -158,6 +162,7 @@ async function startGateway() {
         }
       },
 
+      // Get all orders for specific user
       ordersByUser: async (_, { userId }) => {
         try {
           const response = await fetch("http://localhost:4003/query", {
@@ -177,6 +182,7 @@ async function startGateway() {
     },
   };
 
+  // Create Apollo GraphQL server with schema and resolver
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -184,11 +190,14 @@ async function startGateway() {
     playground: true,
   });
 
+  // Create Express web server
   const app = express();
 
+  // Start Apollo server and connect it to Express
   await server.start();
   server.applyMiddleware({ app, path: "/graphql" });
 
+  // Health check endpoint: Monitor and Debug
   app.get("/health", (req, res) => {
     res.json({
       status: "healthy",
@@ -201,6 +210,7 @@ async function startGateway() {
     });
   });
 
+  // Start server
   const port = 4000;
 
   app.listen(port, () => {
@@ -214,4 +224,5 @@ async function startGateway() {
   });
 }
 
+// Start gateway and handle startup errors
 startGateway().catch(console.error);

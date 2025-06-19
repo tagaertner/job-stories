@@ -1,5 +1,6 @@
 package resolvers
 
+
 import (
 	"context"
 	"e-commerce/services/products/generated"
@@ -23,12 +24,12 @@ func NewResolver() *Resolver {
 	}
 }
 
-// Products is the resolver for the products field.
+// Get all products
 func (r *queryResolver) Products(ctx context.Context) ([]*models.Product, error) {
 	return r.Resolver.products, nil
 }
 
-// Product is the resolver for the product field.
+// Get one specific product
 func (r *queryResolver) Product(ctx context.Context, id string) (*models.Product, error) {
 	for _, product := range r.Resolver.products {
 		if product.ID == id {
@@ -42,6 +43,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*models.Product
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
+
 
 func stringPtr(s string) *string {
 	return &s

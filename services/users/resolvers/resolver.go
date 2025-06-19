@@ -1,5 +1,7 @@
 package resolvers
 
+// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
+
 import (
 	"context"
 	"e-commerce/services/users/generated"
@@ -23,12 +25,12 @@ func NewResolver() *Resolver {
 	}
 }
 
-// Users is the resolver for the users field.
+// Get all users
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 	return r.Resolver.users, nil
 }
 
-// User is the resolver for the user field.
+// Get one specific user
 func (r *queryResolver) User(ctx context.Context, id string) (*models.User, error) {
 	for _, user := range r.Resolver.users {
 		if user.ID == id {
@@ -42,3 +44,5 @@ func (r *queryResolver) User(ctx context.Context, id string) (*models.User, erro
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
+
+

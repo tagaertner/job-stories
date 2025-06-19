@@ -9,11 +9,13 @@ import (
     "github.com/99designs/gqlgen/graphql/playground"
     "e-commerce/services/products/generated"
     "e-commerce/services/products/resolvers"
+    "github.com/99designs/gqlgen/graphql/handler/transport" 
 )
 
 const defaultPort = "4001"
 
 func main() {
+    
     port := os.Getenv("PORT")
     if port == "" {
         port = defaultPort
@@ -21,9 +23,12 @@ func main() {
 
     resolver := resolvers.NewResolver()
     
-    srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+    srv := handler.New(generated.NewExecutableSchema(generated.Config{
         Resolvers: resolver,
     }))
+    
+    // Add Post transport
+    srv.AddTransport(transport.POST{})
 
     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
     http.Handle("/query", srv)
