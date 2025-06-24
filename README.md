@@ -41,7 +41,7 @@ A demonstration of microservices architecture using **Go** and **Node.js**, and 
 ### Run Everything
 
 ```bash
-git clone https://github.com/tagaertner/e-commerce-graphql.git
+Clone the repo: [https://github.com/tagaertner/e-commerce-graphql.git](https://github.com/tagaertner/e-commerce-graphql.git)
 cd e-commerce-graphql
 docker compose up --build
 
@@ -49,7 +49,7 @@ docker compose up --build
 
 Then, open the GraphQL Playground:
 
-👉 [http://localhost:4000/graphql](http://localhost:4000/graphql)
+ [👉 http://localhost:4000/graphql](http://localhost:4000/graphql)
 
 
 You can now run live GraphQL queries against the composed services.
