@@ -1,5 +1,6 @@
 // Import required dependencies
 const { ApolloServer } = require("apollo-server-express");
+const { ApolloServerPluginLandingPageGraphQLPlayground } = require("apollo-server-core");
 const express = require("express");
 const fetch = require("node-fetch");
 
@@ -57,7 +58,7 @@ async function startGateway() {
       // Get all products
       products: async () => {
         try {
-          const response = await fetch("http://localhost:4001/query", {
+          const response = await fetch("http://products:4001/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -75,7 +76,7 @@ async function startGateway() {
       // Get single product by ID from Products services
       product: async (_, { id }) => {
         try {
-          const response = await fetch("http://localhost:4001/query", {
+          const response = await fetch("http://products:4001/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -93,7 +94,7 @@ async function startGateway() {
       // Get all users
       users: async () => {
         try {
-          const response = await fetch("http://localhost:4002/query", {
+          const response = await fetch("http://users:4002/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -111,7 +112,7 @@ async function startGateway() {
       // Get single user by ID
       user: async (_, { id }) => {
         try {
-          const response = await fetch("http://localhost:4002/query", {
+          const response = await fetch("http://users:4002/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -129,7 +130,7 @@ async function startGateway() {
       // Get all orders
       orders: async () => {
         try {
-          const response = await fetch("http://localhost:4003/query", {
+          const response = await fetch("http://orders:4003/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -147,7 +148,7 @@ async function startGateway() {
       // Get single order by ID
       order: async (_, { id }) => {
         try {
-          const response = await fetch("http://localhost:4003/query", {
+          const response = await fetch("http://orders:4003/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -165,7 +166,7 @@ async function startGateway() {
       // Get all orders for specific user
       ordersByUser: async (_, { userId }) => {
         try {
-          const response = await fetch("http://localhost:4003/query", {
+          const response = await fetch("http://orders:4003/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -203,9 +204,9 @@ async function startGateway() {
       status: "healthy",
       gateway: "e-commerce-proxy",
       services: {
-        products: "http://localhost:4001",
-        users: "http://localhost:4002",
-        orders: "http://localhost:4003",
+        products: "http://products:4001",
+        users: "http://users:4002",
+        orders: "http://orders:4003",
       },
     });
   });

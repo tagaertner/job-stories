@@ -1,0 +1,29 @@
+# ----- Builder Stage -----
+    FROM golang:1.24 AS builder
+
+    WORKDIR /app
+    COPY . .
+    
+    # Install gqlgen and tidy modules
+    RUN go mod tidy
+    RUN go install github.com/99designs/gqlgen@latest
+    
+    # Build for Linux AMD64 explicitly (works on most Docker hosts)
+    RUN GOOS=linux GOARCH=amd64 go build -o main .
+    
+    # ----- Runtime Stage -----
+    FROM debian:bullseye-slim
+    
+    WORKDIR /app
+    
+    # Copy built binary
+    COPY --from=builder /app/main /main
+    
+    # Ensure it has execute permission
+    RUN chmod +x /main
+    
+    # Set the correct port (adj ust for each service)
+    EXPOSE 4001
+    
+    # Run the service
+    ENTRYPOINT ["/main"]

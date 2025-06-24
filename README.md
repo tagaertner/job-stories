@@ -1,6 +1,6 @@
 # E-Commerce Microservices Platform
 
-A demonstration of microservices architecture using **Go** and **Node.js**, and GraphQL APIs.
+A demonstration of microservices architecture using **Go** and **Node.js**, and GraphQL APIs with Docker support.
 
 ## Architecture
 
@@ -25,98 +25,43 @@ A demonstration of microservices architecture using **Go** and **Node.js**, and 
 ## Features
 
 - **Microservices Architecture**: Three independent Go services
-- **API Gateway**: Service composition and unified client interface
-- **Cross-Service Queries**: Data fetching across multiple services
-- **Health Monitoring**: Status endpoints for all services
+- **API Gateway**: Node.js proxy layer to unify GraphQL access
+- **Cross-Service Queries**: Fetch data across services
+- **Health Monitoring**: Each service exposes a `/health` endpoint
+- **Dockerized**: One-line boot-up for all services
 
-## Quick Start
+---
+
+## 🚀 Quick Start (Docker)
 
 ### Prerequisites
 
-- Go 1.24+
-- Node.js 18+
+- [Docker](https://www.docker.com/) installed
 
-### Setup & Installation
-
-**1. Clone and navigate:**
+### Run Everything
 
 ```bash
 git clone https://github.com/tagaertner/e-commerce-graphql.git
-cd e-commerce
+cd e-commerce-graphql
+docker compose up --build
+
+🧠 **You won’t see terminal logs until you run queries.**
+
+Then, open the GraphQL Playground:
+
+👉 [http://localhost:4000/graphql](http://localhost:4000/graphql)
+
+You can now run live GraphQL queries against the composed services.
+
+
+### Example Queries
 ```
-
-**2. Install gateway dependencies:**
-
-```bash
-cd gateway
-npm install
-```
-
-**3. Install Go dependencies for each service:**
-
-```bash
-# Products
-cd services/products
-go mod tidy
-go install github.com/99designs/gqlgen@latest
-
-# Users
-cd ../users
-go mod tidy
-
-# Orders
-cd ../orders
-go mod tidy
-```
-
-### Running the Services
-
-Start each service in a separate terminal:
-
-**Products Service:**
-
-```bash
-cd services/products
-go run main.go
-# Running on http://localhost:4001
-```
-
-**Users Service:**
-
-```bash
-cd services/users
-go run main.go
-# Running on http://localhost:4002
-```
-
-**Orders Service:**
-
-```bash
-cd services/orders
-go run main.go
-# Running on http://localhost:4003
-```
-
-**API Gateway:**
-
-```bash
-cd gateway
-npm run dev
-# Running on http://localhost:4000
-```
-
-### Testing
-
-**GraphQL Playground:** http://localhost:4000/graphql
-
-## API Examples
-
-### Basic Queries
 
 **Get products:**
 
 ```graphql
 query {
+  es
   products {
     id
     name
@@ -142,6 +87,7 @@ query {
 }
 ```
 
+````
 **Cross-service data:**
 
 ```graphql
@@ -163,9 +109,9 @@ query {
     totalPrice
   }
 }
-```
+````
 
-### Service Endpoints
+## Service Endpoints
 
 | Service  | Port | GraphQL Playground            | Health Check                 |
 | -------- | ---- | ----------------------------- | ---------------------------- |
@@ -177,10 +123,12 @@ query {
 ## Project Structure
 
 ```
-e-commerce/
+e-commerce-graphql/
+├── docker-compose.yml         # Docker orchestration
 ├── gateway/                   # Node.js API Gateway
 │   ├── gateway.js            # Service composition logic
-│   └── package.json
+│   ├── package.json
+│   └── Dockerfile            # Gateway container config
 ├── services/                 # Go microservices
 │   ├── products/
 │   │   ├── main.go          # HTTP server setup
@@ -188,11 +136,28 @@ e-commerce/
 │   │   ├── gqlgen.yml       # Code generation config
 │   │   ├── generated/       # Auto-generated GraphQL code
 │   │   ├── models/          # Data models
-│   │   └── resolvers/       # Business logic
+│   │   ├── resolvers/       # Business logic
+│   │   └── Dockerfile       # Products service container
 │   ├── users/               # Same structure
 │   └── orders/              # Same structure
 └── README.md
 ```
+
+## Docker Configuration
+
+The project includes Docker support with:
+
+- **Multi-stage builds** for optimized Go service images
+- **Service networking** for inter-service communication
+- **Health checks** for container monitoring
+- **Volume mounting** for development (optional)
+
+### Docker Services
+
+- **gateway**: Node.js API Gateway (port 4000)
+- **products**: Go Products service (port 4001)
+- **users**: Go Users service (port 4002)
+- **orders**: Go Orders service (port 4003)
 
 ## Future Development
 
@@ -200,17 +165,18 @@ e-commerce/
 
 **2. PostgreSQL Database Integration**
 
-**3.Advanced Queries**
+**3. Advanced Queries**
 
-**3. Authentication & Authorization**
+**4. Authentication & Authorization**
 
-**4. AWS/GCP Deployment**
+**5. AWS/GCP Deployment**
 
 ## Technical Details
 
 **Backend Services:** Go with gqlgen for GraphQL server generation  
 **API Gateway:** Node.js with Express and node-fetch for service composition  
-**Communication:** HTTP/GraphQL between gateway and services
+**Communication:** HTTP/GraphQL between gateway and services  
+**Containerization:** Docker with multi-stage builds for production-ready images
 
 ## Sample Data
 

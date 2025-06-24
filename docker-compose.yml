@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  products:
+    build: ./services/products
+    ports:
+      - "4001:4001"
+
+  users:
+    build: ./services/users
+    ports:
+      - "4002:4002"
+
+  orders:
+    build: ./services/orders
+    ports:
+      - "4003:4003"
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "4000:4000"
+    depends_on:
+      - products
+      - users
+      - orders
