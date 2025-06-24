@@ -45,10 +45,12 @@ Clone the repo: https://github.com/tagaertner/e-commerce-graphql.git
 Navigate to the project: `cd e-commerce-graphql`
 Start the services: `docker compose up --build`
 
-🧠 You won't see terminal logs until you run queries.
+🧠 You will not see terminal logs until you run queries.
 
-Then, open the GraphQL Playground:
-👉 http://localhost:4000/graphql
+Then, click belwo open the GraphQL Playground:
+👉 [Playground](http://localhost:4000/graphql)
+
+
 
 You can now run live GraphQL queries against the composed services.
 
