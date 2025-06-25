@@ -157,13 +157,15 @@ The project includes Docker support with:
 
 **1. Testing**
 
-**2. PostgreSQL Database Integration**
+**2. Add Mutations**
 
-**3. Advanced Queries**
+**3. Add data layer/Database Integration**
 
-**4. Authentication & Authorization**
+**4. Advanced Queries**
 
-**5. AWS/GCP Deployment**
+**5. Authentication & Authorization**
+
+**6. AWS/GCP Deployment**
 
 ## Technical Details
 
