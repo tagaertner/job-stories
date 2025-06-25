@@ -155,11 +155,11 @@ The project includes Docker support with:
 
 ## Future Development
 
-**1. Testing**
+**1. Add data layer/Database Integration**
 
 **2. Add Mutations**
 
-**3. Add data layer/Database Integration**
+**3. Testing**
 
 **4. Advanced Queries**
 
