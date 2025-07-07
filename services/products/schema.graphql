@@ -1,4 +1,6 @@
-type Product {
+extend schema @link(url: "https://specs.apollographql.com/federation/v2.0", import: ["@key", "external"])
+
+type Product @key(fields: "id") {
   id: ID!
   name: String!
   price: Float!
@@ -6,7 +8,11 @@ type Product {
   inventory: Int!
 }
 
-type Query {
+extend type User @key(fields: "id") {
+  id: ID! @external
+}
+
+extend type Query {
   products: [Product!]!
   product(id: ID!): Product
 }

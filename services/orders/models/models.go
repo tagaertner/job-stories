@@ -12,5 +12,14 @@ type Order struct {
 	CreatedAt  string  `json:"createdAt"`
 }
 
+func (Order) IsEntity() {}
+
 type Query struct {
 }
+
+type User struct {
+	ID     string   `json:"id"`
+	Orders []*Order `json:"orders,omitempty"`
+}
+
+func (User) IsEntity() {}

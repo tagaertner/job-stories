@@ -3,17 +3,17 @@ services:
   products:
     build: ./services/products
     ports:
-      - "4001:4001"
+      - "4001"
 
   users:
     build: ./services/users
     ports:
-      - "4002:4002"
+      - "4002"
 
   orders:
     build: ./services/orders
     ports:
-      - "4003:4003"
+      - "4003"
 
   gateway:
     build: ./gateway

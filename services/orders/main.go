@@ -1,43 +1,53 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
+	"os"
 
-    "github.com/99designs/gqlgen/graphql/handler"
-    "github.com/99designs/gqlgen/graphql/playground"
-    "e-commerce/services/orders/generated"
-    "e-commerce/services/orders/resolvers"
-    "github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/tagaertner/e-commerce/services/orders/generated"
+	// "github.com/tagaertner/e-commerce/services/orders/models"
+	"github.com/99designs/gqlgen/graphql/handler/extension" // Import the extension package
+	"github.com/tagaertner/e-commerce/services/orders/resolvers"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 const defaultPort = "4003"
 
 func main() {
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = defaultPort
-    }
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
 
-    resolver := resolvers.NewResolver()
-    
-    srv := handler.New(generated.NewExecutableSchema(generated.Config{
-        Resolvers: resolver,
-    }))
+	resolver := resolvers.NewResolver()
 
-    // Add post trasport
-    srv.AddTransport(transport.POST{})
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{
+		Resolvers: resolver,
+	}))
 
-    http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-    http.Handle("/query", srv)
+	// Add the introspection middleware
+	// You can conditionally enable this based on environment
+	if os.Getenv("ENVIRONMENT") != "production" { // Example conditional enabling
+		srv.Use(extension.Introspection{})
+	}
 
-    // Health check
-    http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Content-Type", "application/json")
-        w.Write([]byte(`{"status": "healthy", "service": "orders"}`))
-    })
+	// Add transports
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.Websocket{})
 
-    log.Printf("🛍️ Orders service ready at http://localhost:%s/", port)
-    log.Fatal(http.ListenAndServe(":"+port, nil))
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	// Health check
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "healthy", "service": "orders"}`))
+	})
+
+	log.Printf("🛍️ Orders service ready at http://localhost:%s/", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

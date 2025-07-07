@@ -12,3 +12,5 @@ type User struct {
 	Role   string `json:"role"`
 	Active bool   `json:"active"`
 }
+
+func (User) IsEntity() {}

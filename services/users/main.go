@@ -10,6 +10,8 @@ import (
     "e-commerce/services/users/generated"
     "e-commerce/services/users/resolvers"
     "github.com/99designs/gqlgen/graphql/handler/transport" 
+    "github.com/99designs/gqlgen/graphql/handler/extension"
+    
 )
 
 
@@ -27,8 +29,16 @@ func main() {
         Resolvers: resolver,
     }))
 
+    // Enable introspection
+    if os.Getenv("ENVIRONMENT") != "production" { // Example conditional enabling
+		srv.Use(extension.Introspection{})
+	}
+
+
     // Post transport
     srv.AddTransport((transport.POST{}))
+    srv.AddTransport(transport.GET{})   
+    srv.AddTransport(transport.Websocket{}) 
 
     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
     http.Handle("/query", srv)

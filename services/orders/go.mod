@@ -1,4 +1,4 @@
-module e-commerce/services/orders
+module github.com/tagaertner/e-commerce/services/orders
 
 go 1.24.0
 

@@ -1,4 +1,6 @@
-type Order {
+extend schema @link(url: "https://specs.apollographql.com/federation/v2.0", import: ["@key", "external"])
+
+type Order @key(fields: "id") {
   id: ID!
   userId: ID!
   productId: ID!
@@ -6,6 +8,11 @@ type Order {
   totalPrice: Float!
   status: String!
   createdAt: String!
+}
+
+extend type User @key(fields: "id") {
+  id: ID! @external
+  orders: [Order]
 }
 
 type Query {

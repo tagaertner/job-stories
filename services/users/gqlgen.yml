@@ -6,19 +6,17 @@ exec:
   package: generated
 
 model:
-  filename: models/models.go
-  package: models
+  filename: generated/models_gen.go
+  package: generated
 
 resolver:
-  filename: resolvers/resolver.go
-  type: Resolver
+  layout: follow-schema
+  dir: resolvers
   package: resolvers
 
-# Configure federation scalars
-models:
-  _Any:
-    model: interface{}
-  _FieldSet:
-    model: string
+federation:
+  filename: generated/federation.go
+  package: generated
+  version: 2
 
 skip_validation: true
