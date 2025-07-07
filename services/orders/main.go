@@ -8,8 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/tagaertner/e-commerce/services/orders/generated"
-	// "github.com/tagaertner/e-commerce/services/orders/models"
-	"github.com/99designs/gqlgen/graphql/handler/extension" // Import the extension package
+	"github.com/99designs/gqlgen/graphql/handler/extension" 
 	"github.com/tagaertner/e-commerce/services/orders/resolvers"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -28,9 +27,8 @@ func main() {
 		Resolvers: resolver,
 	}))
 
-	// Add the introspection middleware
-	// You can conditionally enable this based on environment
-	if os.Getenv("ENVIRONMENT") != "production" { // Example conditional enabling
+	// Introspection 
+	if os.Getenv("ENVIRONMENT") != "production" { 
 		srv.Use(extension.Introspection{})
 	}
 

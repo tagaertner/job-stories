@@ -14,7 +14,6 @@ import (
     
 )
 
-
 const defaultPort = "4002"
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
     }))
 
     // Enable introspection
-    if os.Getenv("ENVIRONMENT") != "production" { // Example conditional enabling
+    if os.Getenv("ENVIRONMENT") != "production" { 
 		srv.Use(extension.Introspection{})
 	}
 

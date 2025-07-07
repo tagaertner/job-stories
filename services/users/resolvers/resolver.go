@@ -1,6 +1,6 @@
 package resolvers
 
-import "e-commerce/services/users/services"  // ✅ Correct local path
+import "e-commerce/services/users/services"  
 
 type Resolver struct {
     UserService *services.UserService

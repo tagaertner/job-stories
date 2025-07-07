@@ -11,8 +11,6 @@ import (
     "e-commerce/services/products/resolvers"
     "github.com/99designs/gqlgen/graphql/handler/transport" 
     "github.com/99designs/gqlgen/graphql/handler/extension"
-    // Remove this import - you don't need models anymore
-    // "e-commerce/services/products/models"
 )
 
 const defaultPort = "4001"
@@ -23,8 +21,8 @@ func main() {
         port = defaultPort
     }
 
-    // NEW WAY - Use the service pattern
-    resolver := resolvers.NewResolver()  // ✅ This creates ProductService with data
+    // Creates Product services with data
+    resolver := resolvers.NewResolver()  
     
     srv := handler.New(generated.NewExecutableSchema(generated.Config{
         Resolvers: resolver,

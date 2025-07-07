@@ -11,7 +11,6 @@ import (
 )
 
 // Users is the resolver for the users field.
-// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*generated.User, error) {
 	return r.UserService.GetAllUsers(), nil
 }
