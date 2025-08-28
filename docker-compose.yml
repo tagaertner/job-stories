@@ -1,25 +1,98 @@
 version: "3.8"
-services:
-  products:
-    build: ./services/products
-    ports:
-      - "4001"
 
-  users:
-    build: ./services/users
+services:
+  db:
+    image: postgres:16
+    container_name: ecom_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "4002"
+      - "5432:5432"
 
   orders:
-    build: ./services/orders
+    build:
+      context: .
+      dockerfile: services/orders/Dockerfile
+    depends_on:
+      - db
     ports:
-      - "4003"
+      - "${PORT_ORDERS}:${PORT_ORDERS}"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_ORDERS}/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PORT: ${PORT_ORDERS}
+
+  users:
+    build:
+      context: .
+      dockerfile: services/users/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "${PORT_USERS}:${PORT_USERS}"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_USERS}/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PORT: ${PORT_USERS}
+
+  products:
+    build:
+      context: .
+      dockerfile: services/products/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "${PORT_PRODUCTS}:${PORT_PRODUCTS}"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_PRODUCTS}/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PORT: ${PORT_PRODUCTS}
 
   gateway:
-    build: ./gateway
-    ports:
-      - "4000:4000"
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     depends_on:
-      - products
-      - users
       - orders
+      - users
+      - products
+    ports:
+      - "${PORT_GATEWAY}:${PORT_GATEWAY}"
+    restart: on-failure
+    environment:
+      PORT: ${PORT_GATEWAY}
+
+volumes:
+  postgres_data:

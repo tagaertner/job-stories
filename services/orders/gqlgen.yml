@@ -6,8 +6,16 @@ exec:
   package: generated
 
 model:
-  filename: generated/models_gen.go
-  package: generated
+  filename: models/models_gen.go
+  package: models
+
+models:
+  Order:
+    model: github.com/tagaertner/e-commerce-graphql/services/orders/models.Order
+  User:
+    model: github.com/tagaertner/e-commerce-graphql/services/orders/models.User
+  Time:
+    model: github.com/tagaertner/e-commerce-graphql/services/orders/models.Time
 
 resolver:
   layout: follow-schema

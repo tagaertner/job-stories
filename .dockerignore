@@ -1,0 +1,39 @@
+# Ignore version control
+.git
+.gitignore
+
+# Ignore editor settings
+.vscode
+.idea
+
+# Ignore OS + build artifacts
+.DS_Store
+*.log
+
+# Ignore Go build/cache artifacts
+**/bin/
+**/pkg/
+**/__pycache__/
+**/*.pyc
+
+# Ignore dependency files that aren't needed in the image
+**/node_modules/
+**/venv/
+**/.env*
+
+# Ignore test files and coverage
+**/tests/
+**/*.test.*
+**/coverage/
+**/.pytest_cache/
+**/.coverage
+**/testdata/
+**/*.prof
+
+# Ignore gqlgen cache and generated Go binaries if checked in
+**/generated/*_test.go
+**/generated/*.prof
+**/gqlgen.yml~
+
+# Ignore Dockerfiles at other levels unless needed
+Dockerfile

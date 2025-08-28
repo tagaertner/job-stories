@@ -1,53 +1,82 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
+	"log"
+	"net/http"
+	"os"
+    "flag"
+    "fmt"
 
-    "github.com/99designs/gqlgen/graphql/handler"
-    "github.com/99designs/gqlgen/graphql/playground"
-    "e-commerce/services/users/generated"
-    "e-commerce/services/users/resolvers"
-    "github.com/99designs/gqlgen/graphql/handler/transport" 
-    "github.com/99designs/gqlgen/graphql/handler/extension"
-    
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/tagaertner/e-commerce-graphql/services/users/generated"
+	"github.com/tagaertner/e-commerce-graphql/services/users/resolvers"
+	"github.com/tagaertner/e-commerce-graphql/services/users/database" 
+    "github.com/joho/godotenv"
 )
 
 const defaultPort = "4002"
 
 func main() {
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = defaultPort
-    }
 
-    resolver := resolvers.NewResolver()
+    err := godotenv.Load()
+    if err != nil {
+    log.Println("⚠️  No .env file found, using system environment variables")
     
-    srv := handler.New(generated.NewExecutableSchema(generated.Config{
-        Resolvers: resolver,
-    }))
+}
+    // Flag to check the database connection and exit
+	testDB := flag.Bool("test-db", false, "Test DB connection and exit")
+	flag.Parse()
 
-    // Enable introspection
-    if os.Getenv("ENVIRONMENT") != "production" { 
-		srv.Use(extension.Introspection{})
+	db := database.Connect()
+
+	if *testDB {
+		sqlDB, err := db.DB()
+		if err != nil {
+			log.Fatalf("❌ Failed to get sql DB: %v", err)
+            fmt.Println("🔍 DB_HOST =", os.Getenv("DB_HOST"))
+		}
+		if err := sqlDB.Ping(); err != nil {
+			log.Fatalf("❌ Database ping failed: %v", err)
+		}
+		log.Println("✅ Connected to PostgreSQL successfully")
+		return // exit after test
+	}
+
+    database.RunMigrations(db)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
 	}
 
 
-    // Post transport
-    srv.AddTransport((transport.POST{}))
-    srv.AddTransport(transport.GET{})   
-    srv.AddTransport(transport.Websocket{}) 
+	// Pass db into your resolver
+	resolver := resolvers.NewResolver(db)
 
-    http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-    http.Handle("/query", srv)
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{
+		Resolvers: resolver,
+	}))
 
-    // Health check
-    http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Content-Type", "application/json")
-        w.Write([]byte(`{"status": "healthy", "service": "users"}`))
-    })
+	// Add supported transport methods for GraphQL requests:
+	// - POST and GET for queries/mutations
+	// - WebSocket transport enables live data features like subscriptions
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.Websocket{})
 
-    log.Printf("🛍️ Users service ready at http://localhost:%s/", port)
-    log.Fatal(http.ListenAndServe(":"+port, nil))
+	// Routes
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "healthy", "service": "users"}`))
+	})
+
+	// log.Printf("🛍️ Users service ready at http://localhost:%s/", port)
+	log.Printf("🛍️ [users] service ready at http://users:%s/query", port)
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
+

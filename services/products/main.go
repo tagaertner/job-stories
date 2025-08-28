@@ -4,37 +4,64 @@ import (
     "log"
     "net/http"
     "os"
+    "flag"
+    "fmt"
 
     "github.com/99designs/gqlgen/graphql/handler"
     "github.com/99designs/gqlgen/graphql/playground"
-    "e-commerce/services/products/generated"
-    "e-commerce/services/products/resolvers"
+    "github.com/tagaertner/e-commerce-graphql/services/products/generated"
+    "github.com/tagaertner/e-commerce-graphql/services/products/resolvers"
     "github.com/99designs/gqlgen/graphql/handler/transport" 
-    "github.com/99designs/gqlgen/graphql/handler/extension"
+    "github.com/tagaertner/e-commerce-graphql/services/products/database" 
+    "github.com/joho/godotenv"
 )
 
 const defaultPort = "4001"
 
 func main() {
+        err := godotenv.Load()
+    if err != nil {
+    log.Println("⚠️  No .env file found, using system environment variables")
+    
+}
+    // Flag to check the database connection and exit
+	testDB := flag.Bool("test-db", false, "Test DB connection and exit")
+	flag.Parse()
+
+	// Connect to the database
+	db := database.Connect()
+
+	if *testDB {
+		sqlDB, err := db.DB()
+		if err != nil {
+			log.Fatalf("❌ Failed to get sql DB: %v", err)
+            fmt.Println("🔍 DB_HOST =", os.Getenv("DB_HOST"))
+		}
+		if err := sqlDB.Ping(); err != nil {
+			log.Fatalf("❌ Database ping failed: %v", err)
+		}
+		log.Println("✅ Connected to PostgreSQL successfully")
+		return // exit after test
+	}
+
+    database.RunMigrations(db)
+
     port := os.Getenv("PORT")
     if port == "" {
         port = defaultPort
     }
 
+  
     // Creates Product services with data
-    resolver := resolvers.NewResolver()  
+    resolver := resolvers.NewResolver(db)  
     
     srv := handler.New(generated.NewExecutableSchema(generated.Config{
         Resolvers: resolver,
     }))
 
-
-    // Enable introspection in non-production environments
-    if os.Getenv("ENVIRONMENT") != "production" {
-        srv.Use(extension.Introspection{})
-    }
-
-    // Add Post transport
+    // Add supported transport methods for GraphQL requests:
+	// - POST and GET for queries/mutations
+	// - WebSocket transport enables live data features like subscriptions
     srv.AddTransport(transport.POST{})
     srv.AddTransport(transport.GET{})    
     srv.AddTransport(transport.Websocket{}) 
@@ -48,7 +75,8 @@ func main() {
         w.Write([]byte(`{"status": "healthy", "service": "products"}`))
     })
 
-    log.Printf("🛍️ Products service ready at http://localhost:%s/", port)
-    log.Fatal(http.ListenAndServe(":"+port, nil))
+    // log.Printf("🛍️ Products service ready at http://localhost:%s/", port)
+    log.Printf("🛍️ [products] service ready at http://products:%s/query", port)
+    log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
 

@@ -1,13 +1,16 @@
 package resolvers
 
-import "e-commerce/services/products/services"
+import (
+	"github.com/tagaertner/e-commerce-graphql/services/products/services"
+	"gorm.io/gorm"
+)
 
 type Resolver struct {
-    ProductService *services.ProductService
+	ProductService *services.ProductService
 }
 
-func NewResolver() *Resolver {
-    return &Resolver{
-        ProductService: services.NewProductService(),
-    }
+func NewResolver(db *gorm.DB) *Resolver {
+	return &Resolver{
+		ProductService: services.NewProductService(db),
+	}
 }

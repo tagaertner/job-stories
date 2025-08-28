@@ -9,6 +9,10 @@ model:
   filename: generated/models_gen.go
   package: generated
 
+models:
+  Product:
+    model: github.com/tagaertner/e-commerce-graphql/services/products/models.Product
+
 resolver:
   layout: follow-schema
   dir: resolvers

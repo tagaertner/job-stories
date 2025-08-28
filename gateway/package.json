@@ -3,22 +3,17 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node gateway.js",
-    "dev": "nodemon gateway.js"
+    "dev": "wait-on http://products:4001/query http://users:4002/query http://orders:4003/query && nodemon gateway.js"
   },
+  "main": "gateway.js",
+  "type": "commonjs",
   "dependencies": {
     "@apollo/gateway": "^2.5.5",
     "@apollo/server": "^4.9.5",
-    "apollo-server-express": "^3.12.0",
-    "express": "^4.18.0",
     "graphql": "^16.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.0"
-  },
-  "main": "gateway.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "description": ""
+    "nodemon": "^3.0.0",
+    "wait-on": "^7.0.1"
+  }
 }

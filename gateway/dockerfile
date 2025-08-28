@@ -1,10 +1,18 @@
-FROM node:18
+FROM node:20-slim
 
 WORKDIR /app
-COPY package*.json ./
+
+# Copy only package files first for better caching
+COPY gateway/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-COPY . .
+# Copy the rest of the gateway code
+COPY gateway/ .
 
+# Expose GraphQL Gateway port
 EXPOSE 4000
-CMD ["npm", "run", "dev"]
+
+# Start the gateway
+CMD ["node", "gateway.js"]

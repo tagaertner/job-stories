@@ -3,3 +3,9 @@ node_modules/
 *.env
 dist/
 .DS_Store
+
+# Ignore any accidentally generated GraphQL code at root
+/generated/
+/resolvers/
+/models/
+/gqlgen.yml
