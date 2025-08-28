@@ -1,34 +1,26 @@
 # ---- Builder Stage ----
-FROM golang:1.24-alpine AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
-# Copy Go modules and download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy all source code
 COPY . .
 
-# 🔍 Show files in users service directory
-RUN echo "📁 Listing ./services/users:" && ls -lah ./services/users/
+RUN go mod tidy
+RUN go install github.com/99designs/gqlgen@latest
 
-# 🔨 Build the binary and show verbose output
-# RUN echo "🔨 Running go build:" && \
-#     CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -v -o /main github.com/tagaertner/e-commerce-graphql/services/users && \
-#     echo "✅ Build complete!" && \
-#     ls -lah /main || echo "⛔️ /main still not found"
-
-
-RUN echo "🔨 Running go build:" && \
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -v -o /main ./services/users/main.go && \
-echo "✅ Build complete!" && \
-ls -lah /main || echo "⛔️ /main still not found"
+# Build users service from /app/services/users
+WORKDIR /app/services/users
+RUN GOOS=linux GOARCH=amd64 go build -o /app/main .
 
 # ---- Runtime Stage ----
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /main .
+FROM debian:bullseye-slim
+
+WORKDIR /app
+COPY --from=builder /app/main /main
 RUN chmod +x /main
+
 EXPOSE 4002
 ENTRYPOINT ["/main"]
