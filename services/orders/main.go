@@ -14,16 +14,26 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/tagaertner/e-commerce-graphql/services/orders/database" 
     "github.com/joho/godotenv"
+    "github.com/99designs/gqlgen/graphql/handler/extension"
+
 )
 
 const defaultPort = "4003"
 
 func main() {
-	err := godotenv.Load()
-    if err != nil {
-    log.Println("⚠️  No .env file found, using system environment variables")
+    // Only load .env file when not in Docker
+    if _, err := os.Stat(".env"); err == nil {
+        err := godotenv.Load()
+        if err != nil {
+            log.Println("⚠️  Failed to load .env file")
+        } else {
+            log.Println("✅ Loaded .env file")
+        }
+    } else {
+        log.Println("📦 Running in containerized environment, using system environment variables")
+    }
     
-}
+    // ... rest of your code
     // Flag to check the database connection and exit
 	testDB := flag.Bool("test-db", false, "Test DB connection and exit")
 	flag.Parse()
@@ -51,13 +61,14 @@ func main() {
 		port = defaultPort
 	}
 
-	
 	resolver := resolvers.NewResolver(db)
 
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{
 		Resolvers: resolver,
 	}))
-
+    // Add these lines to enable federation introspection
+    // Just enable introspection (this is what you actually need)
+    srv.Use(extension.Introspection{})
 
 	// Add supported transport methods for GraphQL requests:
 	// - POST and GET for queries/mutations

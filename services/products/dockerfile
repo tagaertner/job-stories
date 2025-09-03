@@ -1,28 +1,32 @@
-# 🏗 Stage 1: Build
-FROM golang:1.24 AS builder
+# syntax=docker/dockerfile:1.4
+
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
+
+RUN apk add --no-cache git
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-RUN go mod tidy
-RUN go install github.com/99designs/gqlgen@latest
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o server ./services/products && chmod +x server
 
-# Build users service from /app/services/users
-WORKDIR /app/services/products
-RUN GOOS=linux GOARCH=amd64 go build -o /app/main .
-
-# 🏁 Stage 2: Minimal final image
-FROM debian:bullseye-slim
+FROM --platform=$TARGETPLATFORM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/main /main
+RUN apk --no-cache add ca-certificates
 
-RUN chmod +x /main
+COPY --from=builder /app/server .
+
+COPY --from=builder /app/.env* ./
+
+# To this:
 EXPOSE 4001
 
-ENTRYPOINT [ "/main" ] 
+CMD ["./server"]

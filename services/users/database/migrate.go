@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	 "github.com/tagaertner/e-commerce-graphql/services/users/models"
+	"time"
+	"github.com/tagaertner/e-commerce-graphql/services/users/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -19,12 +20,25 @@ func Connect() *gorm.DB {
 		os.Getenv("DB_PORT"),
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("❌ Failed to connect to database: %v", err)
+	maxRetries := 20
+	retryDelay := 3 * time.Second
+
+	for i := 0; i < maxRetries; i++ {
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			log.Println("✅ Connected to PostgreSQL successfully")
+			return db
+		}
+
+		log.Printf("❌ Database connection attempt %d/%d failed: %v", i+1, maxRetries, err)
+		if i < maxRetries-1 {
+			log.Printf("⏳ Retrying in %v...", retryDelay)
+			time.Sleep(retryDelay)
+		}
 	}
 
-	return db
+	log.Fatalf("❌ Could not connect to database after %d retries", maxRetries)
+	return nil
 }
 
 func RunMigrations(db *gorm.DB) {

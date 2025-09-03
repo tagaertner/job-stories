@@ -24,6 +24,11 @@ async function startServer() {
     const server = new ApolloServer({
       gateway,
       introspection: true, // Enable introspection for development
+      csrfPrevention: {
+        requestHeaders: {
+          "apollo-required-preflight": { required: false },
+        },
+      },
       plugins: [
         // Enable GraphQL Playground
         ApolloServerPluginLandingPageLocalDefault({
