@@ -6,10 +6,19 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/tagaertner/e-commerce-graphql/services/orders/generated"
 	"github.com/tagaertner/e-commerce-graphql/services/orders/models"
 )
+
+// User is the resolver for the user field.
+func (r *orderResolver) User(ctx context.Context, obj *models.Order) (*models.User, error) {
+	return &models.User{ID: obj.UserID}, nil
+}
+
+// Product is the resolver for the product field.
+func (r *orderResolver) Product(ctx context.Context, obj *models.Order) (*models.Product, error) {
+	return &models.Product{ID: obj.ProductID}, nil
+}
 
 // Orders is the resolver for the orders field in the Query type.
 func (r *queryResolver) Orders(ctx context.Context) ([]*models.Order, error) {
@@ -31,11 +40,15 @@ func (r *userResolver) Orders(ctx context.Context, obj *models.User) ([]*models.
 	return r.OrderService.GetOrdersByUserID(obj.ID)
 }
 
+// Order returns generated.OrderResolver implementation.
+func (r *Resolver) Order() generated.OrderResolver { return &orderResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
+type orderResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-
 	"github.com/tagaertner/e-commerce-graphql/services/orders/generated"
 	"github.com/tagaertner/e-commerce-graphql/services/orders/models"
 )
@@ -14,6 +13,11 @@ import (
 // FindOrderByID is the resolver for the findOrderByID field.
 func (r *entityResolver) FindOrderByID(ctx context.Context, id string) (*models.Order, error) {
 	return r.OrderService.GetOrderByID(id)
+}
+
+// FindProductByID is the resolver for the findProductByID field.
+func (r *entityResolver) FindProductByID(ctx context.Context, id string) (*models.Product, error) {
+	return &models.Product{ID: id}, nil
 }
 
 // FindUserByID is the resolver for the findUserByID field.

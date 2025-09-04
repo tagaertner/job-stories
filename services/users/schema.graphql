@@ -1,4 +1,4 @@
-extend schema @link(url: "https://specs.apollographql.com/federation/v2.0", import: ["@key", "external"])
+extend schema @link(url: "https://specs.apollographql.com/federation/v2.0", import: ["@key", "@external"])
 
 type User @key(fields: "id") {
   id: ID!

@@ -1,7 +1,8 @@
 package models
 
 type User struct {
-	ID string
+	ID string `json:"id"`
+	
 }
 
 func (User) IsEntity() {}
