@@ -33,7 +33,6 @@ func main() {
         log.Println("📦 Running in containerized environment, using system environment variables")
     }
     
-    // ... rest of your code
     // Flag to check the database connection and exit
 	testDB := flag.Bool("test-db", false, "Test DB connection and exit")
 	flag.Parse()
@@ -66,11 +65,11 @@ func main() {
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{
 		Resolvers: resolver,
 	}))
-    // Add these lines to enable federation introspection
-    // Just enable introspection (this is what you actually need)
+
+    // Enable federation introspection
     srv.Use(extension.Introspection{})
 
-	// Add supported transport methods for GraphQL requests:
+	// Supported transport methods for GraphQL requests:
 	// - POST and GET for queries/mutations
 	// - WebSocket transport enables live data features like subscriptions
 	srv.AddTransport(transport.POST{})
@@ -86,7 +85,6 @@ func main() {
 		w.Write([]byte(`{"status": "healthy", "service": "orders"}`))
 	})
 
-	// log.Printf("🛍️ Orders service ready at http://localhost:%s/", port)
 	log.Printf("🛍️ [orders] service ready at http://orders:%s/query", port)
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }

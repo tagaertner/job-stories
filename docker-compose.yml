@@ -37,7 +37,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       db:
-        condition: service_healthy # Only wait for DB
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4001/graphql"]
@@ -63,7 +63,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       db:
-        condition: service_healthy # Only wait for DB
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4003/graphql"]
@@ -89,7 +89,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       db:
-        condition: service_healthy # Only wait for DB
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4002/graphql"]

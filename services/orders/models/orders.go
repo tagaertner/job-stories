@@ -10,7 +10,6 @@ type Order struct {
 	CreatedAt  Time    `json:"createdAt"` // <- custom Time type
 }
 
-
 func (Order) IsEntity() {}
 
 

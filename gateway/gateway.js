@@ -16,8 +16,8 @@ async function startServer() {
           { name: "orders", url: "http://orders:4003/query" },
         ],
       }),
-      // Optional: Add polling for schema updates in development
-      pollIntervalInMs: 10000, // Poll every 10 seconds for schema changes
+      // Poll every 10 seconds for schema changes
+      pollIntervalInMs: 10000,
     });
 
     // Create Apollo Server with the gateway
@@ -25,9 +25,7 @@ async function startServer() {
       gateway,
       introspection: true, // Enable introspection for development
       csrfPrevention: {
-        requestHeaders: {
-          "apollo-required-preflight": { required: false },
-        },
+        requestHeaders: ["apollo-required-preflight"],
       },
       plugins: [
         // Enable GraphQL Playground
@@ -64,7 +62,7 @@ async function startServer() {
       },
     });
 
-    // Start the server (v4 syntax)
+    // Start the server
     const { url } = await startStandaloneServer(server, {
       listen: { port: 4000 },
     });
@@ -100,7 +98,7 @@ async function startServer() {
   } catch (error) {
     console.error("💥 Failed to start federation gateway:", error);
 
-    // Provide helpful error messages
+    // Error messages
     if (error.message.includes("ECONNREFUSED")) {
       console.error("");
       console.error("🚨 Connection Error: Make sure all services are running:");
