@@ -6,15 +6,13 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/tagaertner/e-commerce-graphql/services/users/generated"
 	"github.com/tagaertner/e-commerce-graphql/services/users/models"
 )
 
 // FindUserByID is the resolver for the findUserByID field.
 func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*models.User, error) {
-	panic(fmt.Errorf("not implemented: FindUserByID - findUserByID"))
+	return r.UserService.GetUserByID(id)
 }
 
 // Entity returns generated.EntityResolver implementation.

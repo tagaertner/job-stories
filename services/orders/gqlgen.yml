@@ -14,6 +14,8 @@ models:
     model: github.com/tagaertner/e-commerce-graphql/services/orders/models.Order
   User:
     model: github.com/tagaertner/e-commerce-graphql/services/orders/models.User
+  Product:
+    model: github.com/tagaertner/e-commerce-graphql/services/orders/models.Product
   Time:
     model: github.com/tagaertner/e-commerce-graphql/services/orders/models.Time
 
