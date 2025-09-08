@@ -15,6 +15,7 @@ import (
 	"github.com/tagaertner/e-commerce-graphql/services/orders/database" 
     "github.com/joho/godotenv"
     "github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/tagaertner/e-commerce-graphql/services/orders/services"
 
 )
 
@@ -60,11 +61,20 @@ func main() {
 		port = defaultPort
 	}
 
-	resolver := resolvers.NewResolver(db)
+// Creates Order services with data
+    orderService := services.NewOrderService(db)
 
-	srv := handler.New(generated.NewExecutableSchema(generated.Config{
-		Resolvers: resolver,
-	}))
+    resolver := &resolvers.Resolver{
+        OrderService: orderService,
+    }
+
+	srv := handler.New(generated.NewExecutableSchema(
+		generated.Config{
+			Resolvers: resolver,
+		},
+        ),    )
+
+
 
     // Enable federation introspection
     srv.Use(extension.Introspection{})

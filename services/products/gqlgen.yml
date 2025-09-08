@@ -10,8 +10,12 @@ model:
   package: generated
 
 models:
-  Product:
-    model: github.com/tagaertner/e-commerce-graphql/services/products/models.Product
+  CreateProductInput:
+    model: github.com/tagaertner/e-commerce-graphql/services/products/models.CreateProductInput
+  UpdateProductInput:
+    model: github.com/tagaertner/e-commerce-graphql/services/products/models.UpdateProductInput
+  DeleteProductInput:
+    model: github.com/tagaertner/e-commerce-graphql/services/products/models.DeleteProductInput
 
 resolver:
   layout: follow-schema

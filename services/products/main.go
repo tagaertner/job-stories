@@ -1,20 +1,21 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "os"
-    "flag"
-    "fmt"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
 
-    "github.com/99designs/gqlgen/graphql/handler"
-    "github.com/99designs/gqlgen/graphql/playground"
-    "github.com/tagaertner/e-commerce-graphql/services/products/generated"
-    "github.com/tagaertner/e-commerce-graphql/services/products/resolvers"
-    "github.com/99designs/gqlgen/graphql/handler/transport" 
-    "github.com/tagaertner/e-commerce-graphql/services/products/database" 
-    "github.com/joho/godotenv"
-    "github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/joho/godotenv"
+	"github.com/tagaertner/e-commerce-graphql/services/products/database"
+	"github.com/tagaertner/e-commerce-graphql/services/products/generated"
+	"github.com/tagaertner/e-commerce-graphql/services/products/resolvers"
+    "github.com/tagaertner/e-commerce-graphql/services/products/services"
 )
 
 const defaultPort = "4001"
@@ -63,11 +64,18 @@ func main() {
 
   
     // Creates Product services with data
-    resolver := resolvers.NewResolver(db)  
-    
-    srv := handler.New(generated.NewExecutableSchema(generated.Config{
-        Resolvers: resolver,
-    }))
+    productService := services.NewProductService(db)
+
+    resolver := &resolvers.Resolver{
+        ProductService: productService,
+    }
+
+	srv := handler.New(generated.NewExecutableSchema(
+		generated.Config{
+			Resolvers: resolver,
+		},
+        ),
+    )
 
     // Just enable introspection (this is what you actually need)
     srv.Use(extension.Introspection{})

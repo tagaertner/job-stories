@@ -11,9 +11,24 @@ import (
 	"github.com/tagaertner/e-commerce-graphql/services/users/models"
 )
 
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input models.CreateUserInput) (*models.User, error) {
+	return r.UserService.CreateUser(ctx, input.Name, input.Email)
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUserInput) (*models.User, error) {
+	return r.UserService.UpdateUser(ctx, id, input.Name, input.Email, input.Role, input.Active)
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, input models.DeleteUserInput) (bool, error) {
+	return r.UserService.DeleteUser(ctx, input)
+}
+
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
-	users, err := r.UserService.GetAllUsers()
+	users, err := r.UserService.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -22,14 +37,18 @@ func (r *queryResolver) Users(ctx context.Context) ([]*models.User, error) {
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*models.User, error) {
-	user, err := r.UserService.GetUserByID(id)
+	user, err := r.UserService.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

@@ -21,3 +21,42 @@ type Query {
   order(id: ID!): Order
   ordersByUser(userId: ID!): [Order!]!
 }
+
+input CreateOrderInput {
+  userId: ID!
+  productId: ID!
+  quantity: Int!
+  totalPrice: Float!
+  status: String!
+  createdAt: Time!
+}
+
+input UpdateOrderInput {
+  orderId: ID!
+  quantity: Int
+  totalPrice: Float
+  status: String
+}
+
+input DeleteOrderInput {
+  orderId: ID!
+  userId: ID!
+}
+
+input SetOrderStatusInput {
+  orderId: ID!
+  status: String!
+}
+
+input ChangeOrderQuantityInput {
+  orderId: ID!
+  quantity: Int!
+}
+
+type Mutation {
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrder(input: UpdateOrderInput!): Order!
+  deleteOrder(input: DeleteOrderInput!): Boolean!
+  setOrderStatus(input: SetOrderStatusInput!): Order!
+  changeOrderQuantity(input: ChangeOrderQuantityInput!): Order!
+}

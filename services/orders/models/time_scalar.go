@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"io"
+	"database/sql/driver"
 )
 
 type Time time.Time
@@ -24,4 +25,16 @@ func (t *Time) UnmarshalGQL(v interface{}) error {
 	}
 	*t = Time(parsed)
 	return nil
+}
+
+func (t Time)Value() (driver.Value, error) {
+	return time.Time(t), nil
+}
+
+func (t *Time) Scan(value interface{}) error{
+	if val, ok := value.(time.Time); ok {
+		*t = Time(val)
+		return nil
+	}
+	return fmt.Errorf("cannot scan value into TIme: %v", value)
 }
