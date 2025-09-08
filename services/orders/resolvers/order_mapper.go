@@ -32,4 +32,8 @@ func ToGraphQLUser(u *models.User) *generated.User {
     }
 }
 
-
+func ToGraphQLProduct(p *models.Product) *generated.Product {
+	return &generated.Product{
+		ID: p.ID,
+	}
+}

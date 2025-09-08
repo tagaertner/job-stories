@@ -49,8 +49,9 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Entity struct {
-		FindOrderByID func(childComplexity int, id string) int
-		FindUserByID  func(childComplexity int, id string) int
+		FindOrderByID   func(childComplexity int, id string) int
+		FindProductByID func(childComplexity int, id string) int
+		FindUserByID    func(childComplexity int, id string) int
 	}
 
 	Mutation struct {
@@ -97,6 +98,7 @@ type ComplexityRoot struct {
 
 type EntityResolver interface {
 	FindOrderByID(ctx context.Context, id string) (*Order, error)
+	FindProductByID(ctx context.Context, id string) (*Product, error)
 	FindUserByID(ctx context.Context, id string) (*User, error)
 }
 type MutationResolver interface {
@@ -105,10 +107,6 @@ type MutationResolver interface {
 	DeleteOrder(ctx context.Context, input models.DeleteOrderInput) (bool, error)
 	SetOrderStatus(ctx context.Context, input models.SetOrderStatusInput) (*Order, error)
 	ChangeOrderQuantity(ctx context.Context, input models.ChangeOrderQuantityInput) (*Order, error)
-}
-type OrderResolver interface {
-	User(ctx context.Context, obj *models.Order) (*models.User, error)
-	Product(ctx context.Context, obj *models.Order) (*models.Product, error)
 }
 type QueryResolver interface {
 	Orders(ctx context.Context) ([]*Order, error)
@@ -918,9 +916,9 @@ func (ec *executionContext) _Entity_findProductByID(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.Product)
+	res := resTmp.(*Product)
 	fc.Result = res
-	return ec.marshalNProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋmodelsᚐProduct(ctx, field.Selections, res)
+	return ec.marshalNProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐProduct(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Entity_findProductByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1057,6 +1055,10 @@ func (ec *executionContext) fieldContext_Mutation_createOrder(ctx context.Contex
 				return ec.fieldContext_Order_userId(ctx, field)
 			case "productId":
 				return ec.fieldContext_Order_productId(ctx, field)
+			case "user":
+				return ec.fieldContext_Order_user(ctx, field)
+			case "product":
+				return ec.fieldContext_Order_product(ctx, field)
 			case "quantity":
 				return ec.fieldContext_Order_quantity(ctx, field)
 			case "totalPrice":
@@ -1128,6 +1130,10 @@ func (ec *executionContext) fieldContext_Mutation_updateOrder(ctx context.Contex
 				return ec.fieldContext_Order_userId(ctx, field)
 			case "productId":
 				return ec.fieldContext_Order_productId(ctx, field)
+			case "user":
+				return ec.fieldContext_Order_user(ctx, field)
+			case "product":
+				return ec.fieldContext_Order_product(ctx, field)
 			case "quantity":
 				return ec.fieldContext_Order_quantity(ctx, field)
 			case "totalPrice":
@@ -1254,6 +1260,10 @@ func (ec *executionContext) fieldContext_Mutation_setOrderStatus(ctx context.Con
 				return ec.fieldContext_Order_userId(ctx, field)
 			case "productId":
 				return ec.fieldContext_Order_productId(ctx, field)
+			case "user":
+				return ec.fieldContext_Order_user(ctx, field)
+			case "product":
+				return ec.fieldContext_Order_product(ctx, field)
 			case "quantity":
 				return ec.fieldContext_Order_quantity(ctx, field)
 			case "totalPrice":
@@ -1325,6 +1335,10 @@ func (ec *executionContext) fieldContext_Mutation_changeOrderQuantity(ctx contex
 				return ec.fieldContext_Order_userId(ctx, field)
 			case "productId":
 				return ec.fieldContext_Order_productId(ctx, field)
+			case "user":
+				return ec.fieldContext_Order_user(ctx, field)
+			case "product":
+				return ec.fieldContext_Order_product(ctx, field)
 			case "quantity":
 				return ec.fieldContext_Order_quantity(ctx, field)
 			case "totalPrice":
@@ -1478,6 +1492,98 @@ func (ec *executionContext) fieldContext_Order_productId(_ context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Order_user(ctx context.Context, field graphql.CollectedField, obj *Order) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Order_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Order_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Order",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Order_product(ctx context.Context, field graphql.CollectedField, obj *Order) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Order_product(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Product, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Product)
+	fc.Result = res
+	return ec.marshalOProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Order_product(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Order",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Product_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
 	}
 	return fc, nil
@@ -1659,7 +1765,7 @@ func (ec *executionContext) fieldContext_Order_createdAt(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *models.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *Product) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Product_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4472,6 +4578,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._User(ctx, sel, obj)
+	case Product:
+		return ec._Product(ctx, sel, &obj)
+	case *Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
 	case Order:
 		return ec._Order(ctx, sel, &obj)
 	case *Order:
@@ -4687,103 +4800,41 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 		case "id":
 			out.Values[i] = ec._Order_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "userId":
 			out.Values[i] = ec._Order_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "productId":
 			out.Values[i] = ec._Order_productId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Order_user(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			out.Values[i] = ec._Order_user(ctx, field, obj)
 		case "product":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Order_product(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			out.Values[i] = ec._Order_product(ctx, field, obj)
 		case "quantity":
 			out.Values[i] = ec._Order_quantity(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "totalPrice":
 			out.Values[i] = ec._Order_totalPrice(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "status":
 			out.Values[i] = ec._Order_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		case "createdAt":
 			out.Values[i] = ec._Order_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -4810,7 +4861,7 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 
 var productImplementors = []string{"Product", "_Entity"}
 
-func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *models.Product) graphql.Marshaler {
+func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *Product) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5569,6 +5620,20 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcom
 	return ec._Order(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProduct2githubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐProduct(ctx context.Context, sel ast.SelectionSet, v Product) graphql.Marshaler {
+	return ec._Product(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Product(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSetOrderStatusInput2githubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋmodelsᚐSetOrderStatusInput(ctx context.Context, v any) (models.SetOrderStatusInput, error) {
 	res, err := ec.unmarshalInputSetOrderStatusInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6253,7 +6318,7 @@ func (ec *executionContext) marshalOOrder2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcom
 	return ec._Order(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋmodelsᚐProduct(ctx context.Context, sel ast.SelectionSet, v *models.Product) graphql.Marshaler {
+func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6326,7 +6391,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋtagaertnerᚋeᚑcommerceᚑgraphqlᚋservicesᚋordersᚋgeneratedᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
