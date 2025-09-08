@@ -1,0 +1,35 @@
+package resolvers
+
+import (
+	"github.com/tagaertner/e-commerce-graphql/services/orders/generated"
+	"github.com/tagaertner/e-commerce-graphql/services/orders/models"
+)
+
+func ToGraphQLOrder(o *models.Order) *generated.Order {
+	return &generated.Order{
+		ID:         o.ID,
+		UserID:     o.UserID,
+		ProductID:  o.ProductID,
+		Quantity:   o.Quantity,
+		TotalPrice: o.TotalPrice,
+		Status:     o.Status,
+		CreatedAt:  o.CreatedAt,
+	}
+}
+
+func ToGraphQLOrders(orders []*models.Order) []*generated.Order {
+	var graphQLOrders []*generated.Order
+	for _, order := range orders {
+		graphQLOrders = append(graphQLOrders, ToGraphQLOrder(order))
+	}
+	return graphQLOrders
+}
+
+
+func ToGraphQLUser(u *models.User) *generated.User {
+    return &generated.User{
+        ID: u.ID,
+    }
+}
+
+

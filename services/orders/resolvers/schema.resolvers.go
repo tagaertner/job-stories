@@ -6,49 +6,91 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"github.com/tagaertner/e-commerce-graphql/services/orders/generated"
 	"github.com/tagaertner/e-commerce-graphql/services/orders/models"
 )
 
-// User is the resolver for the user field.
-func (r *orderResolver) User(ctx context.Context, obj *models.Order) (*models.User, error) {
-	return &models.User{ID: obj.UserID}, nil
+// CreateOrder is the resolver for the createOrder field.
+func (r *mutationResolver) CreateOrder(ctx context.Context, input models.CreateOrderInput) (*generated.Order, error) {
+	createdAt := time.Time(input.CreatedAt)
+	order, err := r.OrderService.CreateOrder(
+		ctx,
+		input.UserID,
+		input.ProductID,
+		input.Quantity,
+		input.TotalPrice,
+		input.Status,
+		createdAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrder(order), nil
 }
 
-// Product is the resolver for the product field.
-func (r *orderResolver) Product(ctx context.Context, obj *models.Order) (*models.Product, error) {
-	return &models.Product{ID: obj.ProductID}, nil
+// UpdateOrder is the resolver for the updateOrder field.
+func (r *mutationResolver) UpdateOrder(ctx context.Context, input models.UpdateOrderInput) (*generated.Order, error) {
+	order, err := r.OrderService.UpdateOrder(ctx, &input)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrder(order), nil
+}
+
+// DeleteOrder is the resolver for the deleteOrder field.
+func (r *mutationResolver) DeleteOrder(ctx context.Context, input models.DeleteOrderInput) (bool, error) {
+	return r.OrderService.DeleteOrder(ctx, input)
+}
+
+// SetOrderStatus is the resolver for the setOrderStatus field.
+func (r *mutationResolver) SetOrderStatus(ctx context.Context, input models.SetOrderStatusInput) (*generated.Order, error) {
+	order, err := r.OrderService.SetOrderStatus(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrder(order), nil
+}
+
+// ChangeOrderQuantity is the resolver for the changeOrderQuantity field.
+func (r *mutationResolver) ChangeOrderQuantity(ctx context.Context, input models.ChangeOrderQuantityInput) (*generated.Order, error) {
+	panic(fmt.Errorf("not implemented: ChangeOrderQuantity - changeOrderQuantity"))
 }
 
 // Orders is the resolver for the orders field in the Query type.
-func (r *queryResolver) Orders(ctx context.Context) ([]*models.Order, error) {
-	return r.OrderService.GetAllOrders()
+func (r *queryResolver) Orders(ctx context.Context) ([]*generated.Order, error) {
+	orders, err := r.OrderService.GetAllOrders()
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrders(orders), nil
 }
 
 // Order is the resolver for the order field in the Query type.
-func (r *queryResolver) Order(ctx context.Context, id string) (*models.Order, error) {
-	return r.OrderService.GetOrderByID(id)
+func (r *queryResolver) Order(ctx context.Context, id string) (*generated.Order, error) {
+	order, err := r.OrderService.GetOrderByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrder(order), nil
 }
 
 // OrdersByUser is the resolver for the ordersByUser field in the Query type.
-func (r *queryResolver) OrdersByUser(ctx context.Context, userID string) ([]*models.Order, error) {
-	return r.OrderService.GetOrdersByUserID(userID)
+func (r *queryResolver) OrdersByUser(ctx context.Context, userID string) ([]*generated.Order, error) {
+	orders, err := r.OrderService.GetOrdersByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrders(orders), nil
 }
 
-// Orders is the resolver for the orders field in the extended User type (federated).
-func (r *userResolver) Orders(ctx context.Context, obj *models.User) ([]*models.Order, error) {
-	return r.OrderService.GetOrdersByUserID(obj.ID)
-}
-
-// Order returns generated.OrderResolver implementation.
-func (r *Resolver) Order() generated.OrderResolver { return &orderResolver{r} }
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// User returns generated.UserResolver implementation.
-func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
-
-type orderResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }

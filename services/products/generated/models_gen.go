@@ -2,11 +2,29 @@
 
 package generated
 
+type Mutation struct {
+}
+
+type Product struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Description *string `json:"description,omitempty"`
+	Inventory   int     `json:"inventory"`
+	Available   bool    `json:"available"`
+}
+
+func (Product) IsEntity() {}
+
 type Query struct {
 }
 
-type User struct {
-	ID string `json:"id"`
+type RestockProductInput struct {
+	ID       string `json:"id"`
+	Quantity int    `json:"quantity"`
 }
 
-func (User) IsEntity() {}
+type SetProductAvailabilityInput struct {
+	ID        string `json:"id"`
+	Available bool   `json:"available"`
+}

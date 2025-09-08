@@ -72,12 +72,14 @@ A demonstration of a microservices architecture using **Go** and **Node.js**, bu
 
 You can now run live GraphQL queries against the federated services.
 
-### Sample Queries
+---
 
-**Get all products:**
+## Sample Queries
+
+### 🛍️ Get All Products
 
 ```graphql
-query GetProducts {
+query {
   products {
     id
     name
@@ -88,56 +90,112 @@ query GetProducts {
 }
 ```
 
-**Get user with orders:**
+### 👤 Get User and Their Orders
 
 ```graphql
-query GetUserOrders {
+query {
   user(id: "1") {
+    id
     name
     email
-    role
+    orders {
+      id
+      productId
+      quantity
+      totalPrice
+    }
   }
-  orders {
+}
+```
+
+### 📦 Get Order by ID
+
+```graphql
+query {
+  order(id: "3") {
     id
     userId
+    productId
+    quantity
     totalPrice
     status
   }
 }
 ```
 
-**Cross-service federated query:**
+### 👥 Get Orders by User
 
 ```graphql
 query {
-  products {
+  ordersByUser(userId: "4") {
     id
-    name
-    price
-  }
-  users {
-    id
-    name
-    email
-  }
-  orders {
-    id
-    userId
-    productId
+    quantity
     totalPrice
+    status
   }
 }
 ```
 
+---
+
+## Sample Mutations
+
+### ➕ Create Order
+
+```graphql
+mutation {
+  createOrder(
+    input: {
+      userId: "1"
+      productId: "1"
+      quantity: 2
+      totalPrice: 3999.98
+      status: "PENDING"
+      createdAt: "2025-09-08T12:00:00Z"
+    }
+  ) {
+    id
+    userId
+    quantity
+    status
+  }
+}
+```
+
+### 🔁 Update Order
+
+```graphql
+mutation {
+  updateOrder(input: { orderId: "3", quantity: 5, totalPrice: 1249.95, status: "CONFIRMED" }) {
+    id
+    quantity
+    totalPrice
+    status
+  }
+}
+```
+
+### ❌ Delete Order
+
+```graphql
+mutation {
+  deleteOrder(input: { orderId: "4", userId: "4" })
+}
+```
+
+---
+
 ## Service Endpoints
 
-| Service  | Port | GraphQL Endpoint            | Container Health |
-| -------- | ---- | --------------------------- | ---------------- |
-| Products | 4001 | http://localhost:4001/query | ✓ Health checks  |
-| Users    | 4002 | http://localhost:4002/query | ✓ Health checks  |
-| Orders   | 4003 | http://localhost:4003/query | ✓ Health checks  |
-| Gateway  | 4000 | http://localhost:4000       | Federated API    |
-| Database | 5432 | PostgreSQL                  | ✓ Health checks  |
+| Service  | Port | GraphQL Endpoint                                           | Container Health |
+| -------- | ---- | ---------------------------------------------------------- | ---------------- |
+| Products | 4001 | [http://localhost:4001/query](http://localhost:4001/query) | ✓ Health checks  |
+| Users    | 4002 | [http://localhost:4002/query](http://localhost:4002/query) | ✓ Health checks  |
+| Orders   | 4003 | [http://localhost:4003/query](http://localhost:4003/query) | ✓ Health checks  |
+| Gateway  | 4000 | [http://localhost:4000](http://localhost:4000)             | Federated API    |
+| Database | 5432 | PostgreSQL                                                 | ✓ Health checks  |
+
+---
 
 ## Project Structure
 
@@ -155,16 +213,18 @@ e-commerce-graphql/
 ├── services/                     # Go microservices
 │   ├── orders/                  # Orders service
 │   │   ├── main.go
-│   │   ├── database/            # DB connection & migrations
-│   │   ├── models/              # GORM models
-│   │   ├── resolvers/           # GraphQL resolvers
-│   │   ├── services/            # Business logic
+│   │   ├── database/
+│   │   ├── models/
+│   │   ├── resolvers/
+│   │   ├── services/
 │   │   ├── schema.graphql
 │   │   └── dockerfile
 │   ├── products/                # Products service (same structure)
 │   └── users/                   # Users service (same structure)
 └── README.md
 ```
+
+---
 
 ## Database Features
 
@@ -173,19 +233,21 @@ e-commerce-graphql/
 - **Shared database:** All services connect to the same PostgreSQL instance
 - **Health monitoring:** Database health checks ensure services start in correct order
 
-## Sample Data
+---
 
-The system includes comprehensive test data:
+## Sample Data Overview
 
-- **Users:** 10 users (customers and admins, including inactive accounts)
-- **Products:** 15 products (Apple ecosystem with realistic pricing)
-- **Orders:** 20 orders with various statuses (pending, shipped, completed, cancelled)
+- 👥 **Users:** 10 users (admins + customers, with active/inactive statuses)
+- 📦 **Products:** 15 Apple ecosystem products
+- 🧾 **Orders:** 20 orders with realistic statuses (pending, shipped, completed, cancelled)
+
+---
 
 ## Development
 
 ### Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file:
 
 ```bash
 # Database
@@ -202,31 +264,29 @@ PORT_ORDERS=4003
 PORT_GATEWAY=4000
 ```
 
-### Service Dependencies
-
-The Docker Compose setup ensures proper startup order:
+### Docker Compose Boot Order
 
 1. PostgreSQL database starts first
-2. Go services wait for healthy database, then create tables
-3. Seed data is inserted after tables exist
-4. Gateway starts after all services are ready
+2. Go services wait until DB is healthy and run GORM migrations
+3. Seed data is inserted
+4. Gateway starts and composes the federated schema
 
-## Technical Details
+---
 
-- **Backend Services:** Go with `gqlgen` for GraphQL schema generation
-- **API Gateway:** Node.js with Apollo Gateway for federation
-- **Database:** PostgreSQL with GORM for Go services
-- **Communication:** Internal Docker networking between services
-- **Containerization:** Multi-stage Docker builds for production efficiency
+## Technical Stack
 
-## Future Development
+- **Backend Services:** Go + gqlgen (GraphQL API & resolvers)
+- **Gateway:** Node.js + Apollo Federation
+- **Database:** PostgreSQL (shared across services)
+- **Containerization:** Docker & Docker Compose
+- **Dev Experience:** Auto-migrations, seed data, health checks
 
-1. **Advanced Mutations** - Create, update, delete operations
-2. **Real-time Features** - GraphQL subscriptions
-3. **Testing Suite** - Unit and integration tests
-4. **Authentication & Authorization** - JWT tokens, role-based access control
-5. **Monitoring** - Logging, metrics, tracing
-6. **Cloud Deployment** - AWS/GCP with managed databases
+---
+
+## Future Enhancements
+
+- **Automated Testing** — Add unit and integration tests for core services and GraphQL resolvers
+- **Security Improvements** — Implement JWT-based authentication, input validation, and basic rate limiting
 
 ---
 

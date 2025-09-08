@@ -11,8 +11,12 @@ import (
 )
 
 // FindOrderByID is the resolver for the findOrderByID field.
-func (r *entityResolver) FindOrderByID(ctx context.Context, id string) (*models.Order, error) {
-	return r.OrderService.GetOrderByID(id)
+func (r *entityResolver) FindOrderByID(ctx context.Context, id string) (*generated.Order, error) {
+	order, err := r.OrderService.GetOrderByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLOrder(order), nil
 }
 
 // FindProductByID is the resolver for the findProductByID field.
@@ -21,8 +25,9 @@ func (r *entityResolver) FindProductByID(ctx context.Context, id string) (*model
 }
 
 // FindUserByID is the resolver for the findUserByID field.
-func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*models.User, error) {
-	return &models.User{ID: id}, nil
+func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*generated.User, error) {
+	user := &models.User{ID: id}
+	return ToGraphQLUser(user), nil
 }
 
 // Entity returns generated.EntityResolver implementation.

@@ -15,6 +15,7 @@ import (
 	"github.com/tagaertner/e-commerce-graphql/services/users/database" 
     "github.com/joho/godotenv"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/tagaertner/e-commerce-graphql/services/users/services"
 )
 
 const defaultPort = "4002"
@@ -59,11 +60,19 @@ func main() {
 	}
 
 	// Pass db into resolver
-	resolver := resolvers.NewResolver(db)
+	userService := services.NewUserService(db)
 
-	srv := handler.New(generated.NewExecutableSchema(generated.Config{
-		Resolvers: resolver,
-	}))
+	resolver := &resolvers.Resolver{
+		UserService: userService,
+	}
+
+	srv := handler.NewDefaultServer(
+		generated.NewExecutableSchema(
+			generated.Config{
+				Resolvers: resolver,
+			},
+		),
+	)
 
 	// Enable introspection 
     srv.Use(extension.Introspection{})
