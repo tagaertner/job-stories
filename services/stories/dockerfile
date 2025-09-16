@@ -26,7 +26,6 @@ COPY --from=builder /app/server .
 
 COPY --from=builder /app/.env* ./
 
-# To this:
 EXPOSE 4101
 
 CMD ["./server"]

@@ -1,25 +1,30 @@
 package resolvers
 
-// import (
-// 	"github.com/tagaertner/job-stories/services/stories/generated"
-// 	"github.com/tagaertner/job-stories/services/stories/models"
-// )
+import (
+	"github.com/tagaertner/job-stories/services/stories/generated"
+	"github.com/tagaertner/job-stories/services/stories/models"
+	"time"
+	
+)
 
-// func ToGraphQLStory(p *models.Story) *generated.Product {
-// 	return &generated.Story{
-// 		ID:          p.ID,
-// 		Name:        p.Name,
-// 		Price:       p.Price,
-// 		Description: p.Description,
-// 		Inventory:   p.Inventory,
-// 		Available:   p.Available,
-// 	}
-// }
+func ToGraphQLStory(s *models.JobStory) *generated.JobStory {
+	return &generated.JobStory{
+		ID:        s.ID,
+		UserID:    s.UserID,
+		Title:     s.Title,
+		Content:   s.Content,
+		Tags:      s.Tags,
+		Category:  s.Category,
+		Mood:      *s.Mood,
+		CreatedAt: s.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: s.UpdatedAt.Format(time.RFC3339),
+	}
+}
 
-// func ToGraphQLProductList(products []*models.Story) []*generated.Story{
-// 	var gqlStories []*generated.Product
-// 	for _, p := range products {
-// 		gqlStories = append(gqlStories, ToGraphQLProduct(p))
-// 	}
-// 	return gqlStories
-// }
+func ToGraphQLStoryList(stories []*models.JobStory) []*generated.JobStory{
+	var gqlStories []*generated.JobStory
+	for _, s := range stories {
+		gqlStories = append(gqlStories, ToGraphQLStory(s))
+	}
+	return gqlStories
+}

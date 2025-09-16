@@ -1,5 +1,8 @@
 ### 🧠 StackTrack: A lightweight developer journal to log wins, blockers, and growth over time.
 
+## Project Structure
+
+```
 stack-track/
 ├── docker-compose.yml
 ├── go.mod
@@ -56,3 +59,4 @@ stack-track/
 │ └── requirements.txt
 
 └── README.md
+```

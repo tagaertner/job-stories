@@ -42,7 +42,6 @@ type ResolverRoot interface {
 	Entity() EntityResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
-	CreateStoryInput() CreateStoryInputResolver
 	UpdateStoryInput() UpdateStoryInputResolver
 }
 
@@ -99,15 +98,8 @@ type QueryResolver interface {
 	StoriesByUser(ctx context.Context, userID string, filter *StoryFilter) ([]*JobStory, error)
 }
 
-type CreateStoryInputResolver interface {
-	UserID(ctx context.Context, obj *models.CreateStoryInput, data string) error
-
-	Tags(ctx context.Context, obj *models.CreateStoryInput, data []string) error
-}
 type UpdateStoryInputResolver interface {
 	UserID(ctx context.Context, obj *models.UpdateStoryInput, data string) error
-
-	Tags(ctx context.Context, obj *models.UpdateStoryInput, data []string) error
 }
 
 type executableSchema struct {
@@ -444,12 +436,13 @@ input CreateStoryInput {
 }
 
 input UpdateStoryInput {
+  id: ID!
   userId: String!
-  title: String!
-  content: String!
-  tags: [String!]!
-  category: String!
-  mood: String!
+  title: String
+  content: String
+  tags: [String!]
+  category: String
+  mood: String
 }
 
 input DeleteStoryInput {
@@ -3851,9 +3844,7 @@ func (ec *executionContext) unmarshalInputCreateStoryInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.CreateStoryInput().UserID(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.UserID = data
 		case "title":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -3874,12 +3865,10 @@ func (ec *executionContext) unmarshalInputCreateStoryInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.CreateStoryInput().Tags(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Tags = data
 		case "category":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3993,13 +3982,20 @@ func (ec *executionContext) unmarshalInputUpdateStoryInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "title", "content", "tags", "category", "mood"}
+	fieldsInOrder := [...]string{"id", "userId", "title", "content", "tags", "category", "mood"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
 		case "userId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -4011,37 +4007,35 @@ func (ec *executionContext) unmarshalInputUpdateStoryInput(ctx context.Context, 
 			}
 		case "title":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Title = data
 		case "content":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Content = data
 		case "tags":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-			data, err := ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.UpdateStoryInput().Tags(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Tags = data
 		case "category":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Category = data
 		case "mood":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mood"))
-			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

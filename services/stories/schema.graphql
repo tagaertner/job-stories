@@ -31,12 +31,13 @@ input CreateStoryInput {
 }
 
 input UpdateStoryInput {
+  id: ID!
   userId: String!
-  title: String!
-  content: String!
-  tags: [String!]!
-  category: String!
-  mood: String!
+  title: String
+  content: String
+  tags: [String!]
+  category: String
+  mood: String
 }
 
 input DeleteStoryInput {

@@ -43,23 +43,8 @@ func (r *queryResolver) StoriesByUser(ctx context.Context, userID string, filter
 }
 
 // UserID is the resolver for the userId field.
-func (r *createStoryInputResolver) UserID(ctx context.Context, obj *models.CreateStoryInput, data string) error {
-	panic(fmt.Errorf("not implemented: UserID - userId"))
-}
-
-// Tags is the resolver for the tags field.
-func (r *createStoryInputResolver) Tags(ctx context.Context, obj *models.CreateStoryInput, data []string) error {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
-}
-
-// UserID is the resolver for the userId field.
 func (r *updateStoryInputResolver) UserID(ctx context.Context, obj *models.UpdateStoryInput, data string) error {
 	panic(fmt.Errorf("not implemented: UserID - userId"))
-}
-
-// Tags is the resolver for the tags field.
-func (r *updateStoryInputResolver) Tags(ctx context.Context, obj *models.UpdateStoryInput, data []string) error {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -68,11 +53,6 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// CreateStoryInput returns generated.CreateStoryInputResolver implementation.
-func (r *Resolver) CreateStoryInput() generated.CreateStoryInputResolver {
-	return &createStoryInputResolver{r}
-}
-
 // UpdateStoryInput returns generated.UpdateStoryInputResolver implementation.
 func (r *Resolver) UpdateStoryInput() generated.UpdateStoryInputResolver {
 	return &updateStoryInputResolver{r}
@@ -80,5 +60,26 @@ func (r *Resolver) UpdateStoryInput() generated.UpdateStoryInputResolver {
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type createStoryInputResolver struct{ *Resolver }
 type updateStoryInputResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *createStoryInputResolver) UserID(ctx context.Context, obj *models.CreateStoryInput, data string) error {
+	panic(fmt.Errorf("not implemented: UserID - userId"))
+}
+func (r *createStoryInputResolver) Tags(ctx context.Context, obj *models.CreateStoryInput, data []string) error {
+	panic(fmt.Errorf("not implemented: Tags - tags"))
+}
+func (r *updateStoryInputResolver) Tags(ctx context.Context, obj *models.UpdateStoryInput, data []string) error {
+	panic(fmt.Errorf("not implemented: Tags - tags"))
+}
+func (r *Resolver) CreateStoryInput() generated.CreateStoryInputResolver {
+	return &createStoryInputResolver{r}
+}
+type createStoryInputResolver struct{ *Resolver }
+*/

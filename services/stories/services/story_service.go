@@ -1,8 +1,12 @@
 package services
 
 import (
-
+	"github.com/tagaertner/job-stories/services/stories/models"
 	"gorm.io/gorm"
+	"time"
+	"fmt"
+	"context"
+	"errors"
 )
 
 type StoryService struct {
@@ -13,91 +17,104 @@ func NewStoryService(db *gorm.DB) *StoryService {
 	return &StoryService{db: db}
 }
 
-// func (s *StoyrService) GetAllProducts() ([]*models.Product, error) {
-// 	var products []*models.Product
-// 	if err := s.db.Find(&products).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return products, nil
-// }
+func (s *StoryService) GetAllStories() ([]*models.JobStory, error) {
+	var stories []*models.JobStory
+	if err := s.db.Find(&stories).Error; err != nil {
+		return nil, err
+	}
+	return stories, nil
+}
 
-// func (s *ProductService) GetProductByID(id string) (*models.Product, error) {
-// 	var product models.Product
-// 	if err := s.db.First(&product, "id = ?", id).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return &product, nil
-// }
+func (s *StoryService) GetStoryByID(id string) (*models.JobStory, error) {
+	var story models.JobStory
+	if err := s.db.First(&story, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &story, nil
+}
 
-// func (s *ProductService) CreateProduct(ctx context.Context,  name string, price float64, description string, inventory int ) (*models.Product, error){
-// 	product := &models.Product{
-// 		ID:   fmt.Sprintf("product_%d", time.Now().UnixNano()),
-// 		Name: name,
-// 		Price: price,
-// 		Description: &description,
-// 		Inventory: inventory,
-// 		Available: true,
-// 	}
-// 	if err := s.db.WithContext(ctx).Create(product).Error; err != nil{
-// 		return nil, err
-// 	}
-// 	return product, nil
-// }
+func (s *StoryService) CreateStory(
+	ctx context.Context,  
+	input models.CreateStoryInput,
+) (*models.JobStory, error) {
+	story := &models.JobStory{
+		ID:        fmt.Sprintf("story_%d", time.Now().UnixNano()),
+		UserID:    input.UserID,
+		Title:     input.Title,
+		Content:   input.Content,
+		Tags:      input.Tags,
+		Category:  input.Category,
+		Mood:      input.Mood,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-// func (s *ProductService)UpdateProduct(ctx context.Context, id string,  input models.UpdateProductInput) (*models.Product, error){
-// 	product := &models.Product{ID: id}
 
-// 	updates := s.db.WithContext(ctx).Model(&product)
+	if err := s.db.WithContext(ctx).Create(story).Error; err != nil {
+		return nil, err
+	}
+	return story, nil
+}
 
-// 	if input.Name != nil{
-// 		updates = updates.Update("name", *input.Name)
-// 	}
+func (s *StoryService)UpdateStory(
+	ctx context.Context,
+	id string, 
+	input models.UpdateStoryInput)(*models.JobStory, error){
+	story := &models.JobStory{ID: id}
+
+	updates := s.db.WithContext(ctx).Model(&story)
+
+	if input.Title != nil{
+		updates = updates.Update("title", *input.Title)
+	}
 	
-// 	if input.Price != nil{
-// 		updates = updates.Update("price", *input.Price)
-// 	}
-// 	if input.Description != nil{
-// 		updates = updates.Update("description", *input.Description)
-// 	}
-// 	if input.Inventory != nil{
-// 		updates = updates.Update("inventory", *input.Inventory)
-// 	}
+	if input.Content != nil{
+		updates = updates.Update("content", *input.Content)
+	}
+	if input.Category != nil{
+		updates = updates.Update("category", *input.Category)
+	}
+	if input.Mood != nil{
+		updates = updates.Update("mood", *input.Mood)
+	}
 
-// 	// Execute the update
-// 	if err := updates.Error; err != nil{
-// 		return nil, err
-// 	}
+	// Execute the update
+	if err := updates.Error; err != nil{
+		return nil, err
+	}
 
-// 	// Return the updated user
-// 	if err := s.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil{
-// 		return nil, err
-// 	}
-// 	return product, nil
-// }
+	// Return the updated user
+	if err := s.db.WithContext(ctx).First(&story, "id = ?", id).Error; err != nil{
+		return nil, err
+	}
+	return story, nil
+}
 
-// func (s *ProductService)DeleteProduct(ctx context.Context, input models.DeleteProductInput) (bool, error){
-// 	var result *gorm.DB
+func (s *StoryService)DeleteStory(
+	ctx context.Context, 
+	input models.DeleteStoryInput) (bool, error){
+	var result *gorm.DB
 
-// 	if input.ID == nil && input.Name == nil {
-// 		return false, errors.New("either ID or Name must be provided for deletion")
-// 	}
+	if input.ID == nil && input.Title == nil {
+		return false, errors.New("either ID or Title must be provided for deletion")
+	}
 
-// 	if input.ID != nil {
-// 		result = s.db.WithContext(ctx).Delete(&models.Product{}, "id = ?", input.ID)
-// 	} else if input.Name != nil {
-// 		result = s.db.WithContext(ctx).Delete(&models.Product{}, "name = ?", input.Name)
-// 	}
+	if input.ID != nil {
+		result = s.db.WithContext(ctx).Delete(&models.JobStory{}, "id = ?", input.ID)
+	} else if input.Title != nil {
+		result = s.db.WithContext(ctx).Delete(&models.JobStory{}, "title = ?", input.Title)
+	}
 
-// 	if result.Error != nil {
-// 		return false, result.Error
-// 	}
-// 	if result.RowsAffected == 0 {
-// 		return false, nil
-// 	}
-// 	return true, nil
-// }
+	if result.Error != nil {
+		return false, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return false, nil
+	}
+	return true, nil
+}
 
-// func (s *ProductService)RestockProduct(ctx context.Context, id string, quantity int)(*models.Product, error) {
+// func (s *StoryService)RestockProduct(ctx context.Context, id string, quantity int)(*models.Product, error) {
 // 	var product models.Product
 
 // 	// Fetching product
@@ -114,7 +131,7 @@ func NewStoryService(db *gorm.DB) *StoryService {
 // 	return &product, nil 
 // }
 
-// func (s *ProductService)SetProductAvailability(ctx context.Context, id string, available bool) (*models.Product, error){
+// func (s *StoryService)SetProductAvailability(ctx context.Context, id string, available bool) (*models.Product, error){
 // 	var product models.Product
 // 	if err := s.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil{
 // 		return nil, err

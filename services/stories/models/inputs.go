@@ -1,20 +1,24 @@
 package models
 
 type CreateStoryInput struct {
-    Title    string  `json:"title"`
-    Content  string  `json:"content"`
-    Category *string `json:"category,omitempty"`
-    Mood     *string `json:"mood,omitempty"`
+    UserID   string   `json:"userId"`
+    Title    string   `json:"title"`
+    Content  string   `json:"content"`
+    Tags     []string `json:"tags"`
+    Category string  `json:"category"`
+    Mood     *string  `json:"mood,omitempty"`
 }
 
 type UpdateStoryInput struct {
-    ID       string  `json:"id"`
-    Title    *string `json:"title,omitempty"`
-    Content  *string `json:"content,omitempty"`
-    Category *string `json:"category,omitempty"`
-    Mood     *string `json:"mood,omitempty"`
+    ID       string   `json:"id"`
+    Title    *string   `json:"title"`
+    Content  *string   `json:"content"`
+    Tags     *[]string `json:"tags"`
+    Category *string   `json:"category"` 
+    Mood     *string   `json:"mood"`     
 }
 
 type DeleteStoryInput struct {
-    ID string `json:"id"`
+    ID *string `json:"id"`
+    Title    **string   `json:"title"`
 }
