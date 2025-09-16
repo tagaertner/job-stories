@@ -1,15 +1,13 @@
-module github.com/tagaertner/e-commerce-graphql
+module github.com/tagaertner/job-stories
 
-go 1.23.0
-
-toolchain go1.24.0
+go 1.24.0
 
 require (
-	github.com/99designs/gqlgen v0.17.78
+	github.com/99designs/gqlgen v0.17.79
 	github.com/joho/godotenv v1.5.1
 	github.com/vektah/gqlparser/v2 v2.5.30
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gorm v1.30.1
+	gorm.io/gorm v1.31.0
 // add other shared deps here
 )
 
@@ -26,13 +24,13 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 )
 
-replace github.com/tagaertner/e-commerce-graphql/services/users => ./services/users
+replace github.com/tagaertner/job-stories/services/users => ./services/users
 
-replace github.com/tagaertner/e-commerce-graphql/services/orders => ./services/orders
+// replace github.com/tagaertner/job-stories/services/orders => ./services/orders
 
-replace github.com/tagaertner/e-commerce-graphql/services/products => ./services/products
+replace github.com/tagaertner/job-stories/services/stories => ./services/stories

@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
 
 ARG TARGETOS
@@ -7,15 +9,12 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 
-# Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy all source code
 COPY . .
 
-# Build with explicit target platform
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o server ./services/users && chmod +x server
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o server ./services/products && chmod +x server
 
 FROM --platform=$TARGETPLATFORM alpine:latest
 
@@ -27,6 +26,7 @@ COPY --from=builder /app/server .
 
 COPY --from=builder /app/.env* ./
 
-EXPOSE 4102
+# To this:
+EXPOSE 4101
 
 CMD ["./server"]

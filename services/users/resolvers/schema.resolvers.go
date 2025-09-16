@@ -7,8 +7,8 @@ package resolvers
 import (
 	"context"
 
-	"github.com/tagaertner/e-commerce-graphql/services/users/generated"
-	"github.com/tagaertner/e-commerce-graphql/services/users/models"
+	"github.com/tagaertner/job-stories/services/users/generated"
+	"github.com/tagaertner/job-stories/services/users/models"
 )
 
 // CreateUser is the resolver for the createUser field.

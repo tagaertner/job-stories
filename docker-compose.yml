@@ -5,7 +5,7 @@ services:
   db:
     image: postgres:16
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT}:5433"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -20,53 +20,28 @@ services:
       retries: 10
       start_period: 30s
 
-  # 🛍️ Products Service (Go)
-  products:
+  # 📓 Story Service (Go)
+  stories:
     build:
       context: .
-      dockerfile: services/products/dockerfile
+      dockerfile: services/stories/dockerfile
     env_file:
       - .env
     ports:
-      - "${PORT_PRODUCTS}:4001"
+      - "${PORT_PRODUCTS}:4101"
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4001/graphql"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 40s
-
-  # 📦 Orders Service (Go)
-  orders:
-    build:
-      context: .
-      dockerfile: services/orders/dockerfile
-    env_file:
-      - .env
-    ports:
-      - "${PORT_ORDERS}:4003"
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4003/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost4101/graphql"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -80,7 +55,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT_USERS}:4002"
+      - "${PORT_USERS}:4102"
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -92,37 +67,65 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4002/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost:4102/graphql"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 40s
 
+  # 🎨 Gradio Frontend Service (Python) need lots of work
+  # orders:
+  #   build:
+  #     context: .
+  #     dockerfile: services/orders/dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${PORT_ORDERS}:4003"
+  #   environment:
+  #     - DB_HOST=${DB_HOST}
+  #     - DB_PORT=${DB_PORT}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:4103/graphql"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 40s
+
+  # 🤖AI Summary Service port 4104
+
   # Seed runs after services create tables
-  db-seed:
-    image: postgres:16
-    depends_on:
-      db:
-        condition: service_healthy
-      users:
-        condition: service_started
-      products:
-        condition: service_started
-      orders:
-        condition: service_started
-    environment:
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - ./database/init/01-seed-data.sql:/seed-data.sql
-    command: >
-      bash -c "
-        echo 'Waiting for services to create tables...' &&
-        sleep 15 &&
-        echo 'Running seed data...' &&
-        psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /seed-data.sql &&
-        echo 'Seed data completed successfully!'
-      "
-    restart: "no"
+  # db-seed:
+  #   image: postgres:16
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     users:
+  #       condition: service_started
+  #     products:
+  #       condition: service_started
+  #     orders:
+  #       condition: service_started
+  #   environment:
+  #     - PGPASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - ./database/init/01-seed-data.sql:/seed-data.sql
+  #   command: >
+  #     bash -c "
+  #       echo 'Waiting for services to create tables...' &&
+  #       sleep 15 &&
+  #       echo 'Running seed data...' &&
+  #       psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /seed-data.sql &&
+  #       echo 'Seed data completed successfully!'
+  #     "
+  #   restart: "no"
 
   # 🚪 Apollo Gateway (Node.js)
   gateway:
@@ -132,7 +135,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT_GATEWAY}:4000"
+      - "${PORT_GATEWAY}:4100"
     depends_on:
       orders:
         condition: service_started

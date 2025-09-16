@@ -6,14 +6,14 @@ package resolvers
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/tagaertner/job-stories/services/users/generated"
-	"github.com/tagaertner/job-stories/services/users/models"
+	"github.com/tagaertner/job-stories/services/stories/generated"
 )
 
-// FindUserByID is the resolver for the findUserByID field.
-func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*models.User, error) {
-	return r.UserService.GetUserByID(ctx, id)
+// FindJobStoryByID is the resolver for the findJobStoryByID field.
+func (r *entityResolver) FindJobStoryByID(ctx context.Context, id string) (*generated.JobStory, error) {
+	panic(fmt.Errorf("not implemented: FindJobStoryByID - findJobStoryByID"))
 }
 
 // Entity returns generated.EntityResolver implementation.

@@ -1,16 +1,16 @@
 package database
 
-import (
+import(
 	"fmt"
 	"log"
 	"os"
-	"time"
-	"github.com/tagaertner/job-stories/services/users/models"
+	 "github.com/tagaertner/job-stories/services/stories/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"time"
 )
 
-func Connect() *gorm.DB {
+func Connect() *gorm.DB{
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -19,6 +19,7 @@ func Connect() *gorm.DB {
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("DB_PORT"),
 	)
+
 
 	maxRetries := 20
 	retryDelay := 3 * time.Second
@@ -41,10 +42,6 @@ func Connect() *gorm.DB {
 	return nil
 }
 
-func RunMigrations(db *gorm.DB) {
-    log.Println("📦 Running AutoMigrate...")
-    if err := db.AutoMigrate(&models.User{}); err != nil {
-        log.Fatalf("❌ Migration failed: %v", err)
-    }
-    log.Println("✅ Migrations complete")
+func RunMigrations(db *gorm.DB){
+	db.AutoMigrate(&models.Story{})
 }

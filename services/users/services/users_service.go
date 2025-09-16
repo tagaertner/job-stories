@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tagaertner/e-commerce-graphql/services/users/models"
+	"github.com/tagaertner/job-stories/services/users/models"
 	"gorm.io/gorm"
 )
 

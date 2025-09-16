@@ -1,0 +1,56 @@
+extend schema @link(url: "https://specs.apollographql.com/federation/v2.0", import: ["@key", "@external"])
+
+type JobStory @key(fields: "id") {
+  id: ID!
+  userId: String!
+  title: String!
+  content: String!
+  tags: [String!]!
+  category: String!
+  mood: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input StoryFilter {
+  tags: [String!]
+  category: String
+  mood: String
+  dateFrom: String
+  dateTo: String
+  searchText: String
+}
+
+input CreateStoryInput {
+  userId: String!
+  title: String!
+  content: String!
+  tags: [String!]!
+  category: String!
+  mood: String!
+}
+
+input UpdateStoryInput {
+  userId: String!
+  title: String!
+  content: String!
+  tags: [String!]!
+  category: String!
+  mood: String!
+}
+
+input DeleteStoryInput {
+  id: ID
+}
+
+type Query {
+  stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
+  story(id: ID!): JobStory
+  storiesByUser(userId: String!, filter: StoryFilter): [JobStory!]!
+}
+
+type Mutation {
+  createStory(input: CreateStoryInput!): JobStory!
+  updateStory(input: UpdateStoryInput!): JobStory
+  deleteStory(id: ID!): Boolean!
+}

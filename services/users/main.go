@@ -10,12 +10,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/tagaertner/e-commerce-graphql/services/users/generated"
-	"github.com/tagaertner/e-commerce-graphql/services/users/resolvers"
-	"github.com/tagaertner/e-commerce-graphql/services/users/database" 
+	"github.com/tagaertner/job-stories/services/users/generated"
+	"github.com/tagaertner/job-stories/services/users/resolvers"
+	"github.com/tagaertner/job-stories/services/users/database" 
     "github.com/joho/godotenv"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/tagaertner/e-commerce-graphql/services/users/services"
+	"github.com/tagaertner/job-stories/services/users/services"
 )
 
 const defaultPort = "4002"

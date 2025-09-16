@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"github.com/tagaertner/e-commerce-graphql/services/users/services"
+	"github.com/tagaertner/job-stories/services/users/services"
 	"gorm.io/gorm"
 )
 

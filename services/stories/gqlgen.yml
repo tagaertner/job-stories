@@ -1,0 +1,30 @@
+schema:
+  - schema.graphql
+
+exec:
+  filename: generated/generated.go
+  package: generated
+
+model:
+  filename: generated/models_gen.go
+  package: generated
+
+models:
+  CreateStoryInput:
+    model: github.com/tagaertner/job-stories/services/stories/models.CreateStoryInput
+  UpdateStoryInput:
+    model: github.com/tagaertner/job-stories/services/stories/models.UpdateStoryInput
+  DeleteStoryInput:
+    model: github.com/tagaertner/job-stories/services/stories/models.DeleteStoryInput
+
+resolver:
+  layout: follow-schema
+  dir: resolvers
+  package: resolvers
+
+federation:
+  filename: generated/federation.go
+  package: generated
+  version: 2
+
+skip_validation: true

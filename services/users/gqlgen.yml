@@ -11,7 +11,7 @@ model:
 
 models:
   User:
-    model: github.com/tagaertner/e-commerce-graphql/services/users/models.User
+    model: github.com/tagaertner/job-stories/services/users/models.User
   Time:
     model: time.Time
 

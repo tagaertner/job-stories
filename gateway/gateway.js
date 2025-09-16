@@ -11,9 +11,9 @@ async function startServer() {
     const gateway = new ApolloGateway({
       supergraphSdl: new IntrospectAndCompose({
         subgraphs: [
-          { name: "products", url: "http://products:4001/query" },
-          { name: "users", url: "http://users:4002/query" },
-          { name: "orders", url: "http://orders:4003/query" },
+          { name: "products", url: "http://stories:4101/query" },
+          { name: "users", url: "http://users:4102/query" },
+          // { name: "orders", url: "http://orders:4003/query" },
         ],
       }),
       // Poll every 10 seconds for schema changes
@@ -64,7 +64,7 @@ async function startServer() {
 
     // Start the server
     const { url } = await startStandaloneServer(server, {
-      listen: { port: 4000 },
+      listen: { port: 4100 },
     });
 
     // Success logging
@@ -74,9 +74,9 @@ async function startServer() {
     console.log(`🎮 GraphQL Playground: ${url}`);
     console.log("");
     console.log("📋 Connected Services:");
-    console.log("  🛍️  Products Service: http://localhost:4001/query");
-    console.log("  👥 Users Service: http://localhost:4002/query");
-    console.log("  📦 Orders Service: http://localhost:4003/query");
+    console.log("  🛍️  Products Service: http://localhost:4101/query");
+    console.log("  👥 Users Service: http://localhost:4102/query");
+    // console.log("  📦 Orders Service: http://localhost:4003/query");
     console.log("");
     console.log("🔗 Example Federated Query:");
     console.log(`
@@ -86,14 +86,14 @@ async function startServer() {
         email
         # This will automatically resolve across services
       }
-      products {
+      stories {
         name
         price
       }
-      orders {
-        id
-        status
-      }
+      // orders {
+      //   id
+      //   status
+      // }
     }`);
   } catch (error) {
     console.error("💥 Failed to start federation gateway:", error);
@@ -102,9 +102,9 @@ async function startServer() {
     if (error.message.includes("ECONNREFUSED")) {
       console.error("");
       console.error("🚨 Connection Error: Make sure all services are running:");
-      console.error("  - Products service on port 4001");
-      console.error("  - Users service on port 4002");
-      console.error("  - Orders service on port 4003");
+      console.error("  - Stories service on port 4101");
+      console.error("  - Users service on port 4102");
+      // console.error("  - Orders service on port 4103");
       console.error("");
       console.error("💡 Start each service with: go run main.go");
     }
