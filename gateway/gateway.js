@@ -5,7 +5,7 @@ const { ApolloServerPluginLandingPageLocalDefault } = require("@apollo/server/pl
 
 async function startServer() {
   try {
-    console.log("🔄 Starting E-Commerce Federation Gateway...");
+    console.log("🔄 Starting job-stories Federation Gateway...");
 
     // Create the federation gateway
     const gateway = new ApolloGateway({
@@ -74,21 +74,22 @@ async function startServer() {
     console.log(`🎮 GraphQL Playground: ${url}`);
     console.log("");
     console.log("📋 Connected Services:");
-    console.log("  🛍️  Products Service: http://localhost:4101/query");
+    console.log("  📓 Stories Service: http://localhost:4101/query");
     console.log("  👥 Users Service: http://localhost:4102/query");
     // console.log("  📦 Orders Service: http://localhost:4003/query");
     console.log("");
     console.log("🔗 Example Federated Query:");
     console.log(`
     query ExampleCrossServiceQuery {
+    // todo need to fix the example incorrect obj
       user(id: "1") {
         name
         email
         # This will automatically resolve across services
       }
       stories {
-        name
-        price
+        title
+        category
       }
       // orders {
       //   id

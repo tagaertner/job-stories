@@ -33,6 +33,16 @@ func (s *StoryService) GetStoryByID(id string) (*models.JobStory, error) {
 	return &story, nil
 }
 
+func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string) ([]*models.JobStory, error) {
+    var stories []*models.JobStory
+    if err := s.db.WithContext(ctx).Where("user_id = ?", userID).Find(&stories).Error; err != nil {
+        return nil, err
+    }
+    return stories, nil
+}
+
+
+
 func (s *StoryService) CreateStory(
 	ctx context.Context,  
 	input models.CreateStoryInput,
@@ -60,6 +70,7 @@ func (s *StoryService)UpdateStory(
 	ctx context.Context,
 	id string, 
 	input models.UpdateStoryInput)(*models.JobStory, error){
+
 	story := &models.JobStory{ID: id}
 
 	updates := s.db.WithContext(ctx).Model(&story)
@@ -92,7 +103,7 @@ func (s *StoryService)UpdateStory(
 
 func (s *StoryService)DeleteStory(
 	ctx context.Context, 
-	input models.DeleteStoryInput) (bool, error){
+	input *models.DeleteStoryInput) (bool, error){
 	var result *gorm.DB
 
 	if input.ID == nil && input.Title == nil {
@@ -114,33 +125,7 @@ func (s *StoryService)DeleteStory(
 	return true, nil
 }
 
-// func (s *StoryService)RestockProduct(ctx context.Context, id string, quantity int)(*models.Product, error) {
-// 	var product models.Product
 
-// 	// Fetching product
-// 	if err := s.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil {
-// 		return nil, err
-// 	}
 
-// 	// Update inventory
-// 	product.Inventory += quantity
 
-// 	if err := s.db.WithContext(ctx).Save(&product).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return &product, nil 
-// }
 
-// func (s *StoryService)SetProductAvailability(ctx context.Context, id string, available bool) (*models.Product, error){
-// 	var product models.Product
-// 	if err := s.db.WithContext(ctx).First(&product, "id = ?", id).Error; err != nil{
-// 		return nil, err
-// 	}
-
-// 	product.Available = available
-
-// 	if err := s.db.WithContext(ctx).Save(&product).Error; err != nil{
-// 		return nil, err
-// 	}
-// 	return &product, nil
-// }

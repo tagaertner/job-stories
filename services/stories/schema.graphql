@@ -53,5 +53,5 @@ type Query {
 type Mutation {
   createStory(input: CreateStoryInput!): JobStory!
   updateStory(input: UpdateStoryInput!): JobStory
-  deleteStory(id: ID!): Boolean!
+  deleteStory(input: DeleteStoryInput): Boolean!
 }

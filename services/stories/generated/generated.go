@@ -42,7 +42,6 @@ type ResolverRoot interface {
 	Entity() EntityResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
-	UpdateStoryInput() UpdateStoryInputResolver
 }
 
 type DirectiveRoot struct {
@@ -67,7 +66,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateStory func(childComplexity int, input models.CreateStoryInput) int
-		DeleteStory func(childComplexity int, id string) int
+		DeleteStory func(childComplexity int, input *models.DeleteStoryInput) int
 		UpdateStory func(childComplexity int, input models.UpdateStoryInput) int
 	}
 
@@ -90,16 +89,12 @@ type EntityResolver interface {
 type MutationResolver interface {
 	CreateStory(ctx context.Context, input models.CreateStoryInput) (*JobStory, error)
 	UpdateStory(ctx context.Context, input models.UpdateStoryInput) (*JobStory, error)
-	DeleteStory(ctx context.Context, id string) (bool, error)
+	DeleteStory(ctx context.Context, input *models.DeleteStoryInput) (bool, error)
 }
 type QueryResolver interface {
 	Stories(ctx context.Context, filter *StoryFilter, limit *int, offset *int) ([]*JobStory, error)
 	Story(ctx context.Context, id string) (*JobStory, error)
 	StoriesByUser(ctx context.Context, userID string, filter *StoryFilter) ([]*JobStory, error)
-}
-
-type UpdateStoryInputResolver interface {
-	UserID(ctx context.Context, obj *models.UpdateStoryInput, data string) error
 }
 
 type executableSchema struct {
@@ -218,7 +213,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteStory(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteStory(childComplexity, args["input"].(*models.DeleteStoryInput)), true
 
 	case "Mutation.updateStory":
 		if e.complexity.Mutation.UpdateStory == nil {
@@ -458,7 +453,7 @@ type Query {
 type Mutation {
   createStory(input: CreateStoryInput!): JobStory!
   updateStory(input: UpdateStoryInput!): JobStory
-  deleteStory(id: ID!): Boolean!
+  deleteStory(input: DeleteStoryInput): Boolean!
 }
 `, BuiltIn: false},
 	{Name: "../federation/directives.graphql", Input: `
@@ -562,11 +557,11 @@ func (ec *executionContext) field_Mutation_createStory_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_deleteStory_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalODeleteStoryInput2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋmodelsᚐDeleteStoryInput)
 	if err != nil {
 		return nil, err
 	}
-	args["id"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1335,7 +1330,7 @@ func (ec *executionContext) _Mutation_deleteStory(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteStory(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Mutation().DeleteStory(rctx, fc.Args["input"].(*models.DeleteStoryInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3902,7 +3897,7 @@ func (ec *executionContext) unmarshalInputDeleteStoryInput(ctx context.Context, 
 		switch k {
 		case "id":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalOID2string(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3998,44 +3993,42 @@ func (ec *executionContext) unmarshalInputUpdateStoryInput(ctx context.Context, 
 			it.ID = data
 		case "userId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.UpdateStoryInput().UserID(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.UserID = data
 		case "title":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			data, err := ec.unmarshalOString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Title = data
 		case "content":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("content"))
-			data, err := ec.unmarshalOString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Content = data
 		case "tags":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
-			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			data, err := ec.unmarshalOString2ᚖᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Tags = data
 		case "category":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-			data, err := ec.unmarshalOString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Category = data
 		case "mood":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mood"))
-			data, err := ec.unmarshalOString2string(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5514,15 +5507,29 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOID2string(ctx context.Context, v any) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) unmarshalODeleteStoryInput2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋmodelsᚐDeleteStoryInput(ctx context.Context, v any) (*models.DeleteStoryInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDeleteStoryInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	_ = sel
 	_ = ctx
-	res := graphql.MarshalID(v)
+	res := graphql.MarshalID(*v)
 	return res
 }
 
@@ -5623,6 +5630,18 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOString2ᚖᚕstringᚄ(ctx context.Context, v any) (*[]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOString2ᚖᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v *[]string) graphql.Marshaler {
+	return ec.marshalOString2ᚕstringᚄ(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx context.Context, sel ast.SelectionSet, v fedruntime.Entity) graphql.Marshaler {

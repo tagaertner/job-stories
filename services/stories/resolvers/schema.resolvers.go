@@ -6,7 +6,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/tagaertner/job-stories/services/stories/generated"
 	"github.com/tagaertner/job-stories/services/stories/models"
@@ -14,37 +13,59 @@ import (
 
 // CreateStory is the resolver for the createStory field.
 func (r *mutationResolver) CreateStory(ctx context.Context, input models.CreateStoryInput) (*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: CreateStory - createStory"))
+	story, err := r.StoryService.CreateStory(
+		ctx,
+		input,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStory(story), nil
 }
 
 // UpdateStory is the resolver for the updateStory field.
 func (r *mutationResolver) UpdateStory(ctx context.Context, input models.UpdateStoryInput) (*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: UpdateStory - updateStory"))
+	story, err := r.StoryService.UpdateStory(
+		ctx,
+		input.ID,
+		input,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStory(story), nil
 }
 
 // DeleteStory is the resolver for the deleteStory field.
-func (r *mutationResolver) DeleteStory(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteStory - deleteStory"))
+func (r *mutationResolver) DeleteStory(ctx context.Context, input *models.DeleteStoryInput) (bool, error) {
+    return r.StoryService.DeleteStory(ctx, input)
 }
 
 // Stories is the resolver for the stories field.
 func (r *queryResolver) Stories(ctx context.Context, filter *generated.StoryFilter, limit *int, offset *int) ([]*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: Stories - stories"))
+	story, err := r.StoryService.GetAllStories()
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStoryList(story), nil
 }
 
 // Story is the resolver for the story field.
 func (r *queryResolver) Story(ctx context.Context, id string) (*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: Story - story"))
+	story, err := r.StoryService.GetStoryByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStory(story), nil
 }
 
 // StoriesByUser is the resolver for the storiesByUser field.
 func (r *queryResolver) StoriesByUser(ctx context.Context, userID string, filter *generated.StoryFilter) ([]*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: StoriesByUser - storiesByUser"))
-}
-
-// UserID is the resolver for the userId field.
-func (r *updateStoryInputResolver) UserID(ctx context.Context, obj *models.UpdateStoryInput, data string) error {
-	panic(fmt.Errorf("not implemented: UserID - userId"))
+	story, err := r.StoryService.GetStoriesByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStoryList(story), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -53,33 +74,5 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// UpdateStoryInput returns generated.UpdateStoryInputResolver implementation.
-func (r *Resolver) UpdateStoryInput() generated.UpdateStoryInputResolver {
-	return &updateStoryInputResolver{r}
-}
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type updateStoryInputResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *createStoryInputResolver) UserID(ctx context.Context, obj *models.CreateStoryInput, data string) error {
-	panic(fmt.Errorf("not implemented: UserID - userId"))
-}
-func (r *createStoryInputResolver) Tags(ctx context.Context, obj *models.CreateStoryInput, data []string) error {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
-}
-func (r *updateStoryInputResolver) Tags(ctx context.Context, obj *models.UpdateStoryInput, data []string) error {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
-}
-func (r *Resolver) CreateStoryInput() generated.CreateStoryInputResolver {
-	return &createStoryInputResolver{r}
-}
-type createStoryInputResolver struct{ *Resolver }
-*/

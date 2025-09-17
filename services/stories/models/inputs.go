@@ -11,6 +11,7 @@ type CreateStoryInput struct {
 
 type UpdateStoryInput struct {
     ID       string   `json:"id"`
+    UserID   *string   `json:"userId"`
     Title    *string   `json:"title"`
     Content  *string   `json:"content"`
     Tags     *[]string `json:"tags"`
@@ -20,5 +21,5 @@ type UpdateStoryInput struct {
 
 type DeleteStoryInput struct {
     ID *string `json:"id"`
-    Title    **string   `json:"title"`
+    Title    *string   `json:"title"`
 }
