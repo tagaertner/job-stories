@@ -93,11 +93,10 @@ func main() {
     // Health check
     http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
-        w.Write([]byte(`{"status": "healthy", "service": "products"}`))
+        w.Write([]byte(`{"status": "healthy", "service": "stories"}`))
     })
 
-    // log.Printf("🛍️ Products service ready at http://localhost:%s/", port)
-    log.Printf("🛍️ [products] service ready at http://products:%s/query", port)
+    log.Printf("📓 [stories] service ready at http://stories:%s/query", port)
     log.Fatal(http.ListenAndServe("0.0.0.0:"+port, nil))
 }
 

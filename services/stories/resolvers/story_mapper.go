@@ -9,7 +9,7 @@ import (
 
 func ToGraphQLStory(s *models.JobStory) *generated.JobStory {
 	return &generated.JobStory{
-		ID:        s.ID,
+		ID:        s.ID.String(),
 		UserID:    s.UserID,
 		Title:     s.Title,
 		Content:   s.Content,

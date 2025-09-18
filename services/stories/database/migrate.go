@@ -43,5 +43,5 @@ func Connect() *gorm.DB{
 }
 
 func RunMigrations(db *gorm.DB){
-	db.AutoMigrate(&models.Story{})
+	db.AutoMigrate(&models.JobStory{})
 }

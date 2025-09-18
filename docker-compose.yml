@@ -5,13 +5,14 @@ services:
   db:
     image: postgres:16
     ports:
-      - "${DB_PORT}:5433"
+      - "${DB_PORT}:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
+
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -28,7 +29,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT_PRODUCTS}:4101"
+      - "${PORT_STORIES}:4101"
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -74,10 +75,17 @@ services:
       start_period: 40s
 
   # 🎨 Gradio Frontend Service (Python) need lots of work
-  # orders:
-  #   build:
-  #     context: .
-  #     dockerfile: services/orders/dockerfile
+  gradio-ui:
+  build:
+    context: .
+    dockerfile: gradio-ui/Dockerfile
+  ports:
+    - "${PORT_GRADIO}:4103"
+  depends_on:
+    - gateway
+  env_file:
+    - .env
+
   #   env_file:
   #     - .env
   #   ports:
@@ -102,30 +110,30 @@ services:
   # 🤖AI Summary Service port 4104
 
   # Seed runs after services create tables
-  # db-seed:
-  #   image: postgres:16
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     users:
-  #       condition: service_started
-  #     products:
-  #       condition: service_started
-  #     orders:
-  #       condition: service_started
-  #   environment:
-  #     - PGPASSWORD=${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - ./database/init/01-seed-data.sql:/seed-data.sql
-  #   command: >
-  #     bash -c "
-  #       echo 'Waiting for services to create tables...' &&
-  #       sleep 15 &&
-  #       echo 'Running seed data...' &&
-  #       psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /seed-data.sql &&
-  #       echo 'Seed data completed successfully!'
-  #     "
-  #   restart: "no"
+  db-seed:
+    image: postgres:16
+    depends_on:
+      db:
+        condition: service_healthy
+      users:
+        condition: service_started
+      stories:
+        condition: service_started
+      # orders:
+      #   condition: service_started
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./database/init/01-seed-data.sql:/seed-data.sql
+    command: >
+      bash -c "
+        echo 'Waiting for services to create tables...' &&
+        sleep 15 &&
+        echo 'Running seed data...' &&
+        psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -f /seed-data.sql &&
+        echo 'Seed data completed successfully!'
+      "
+    restart: "no"
 
   # 🚪 Apollo Gateway (Node.js)
   gateway:
@@ -137,11 +145,11 @@ services:
     ports:
       - "${PORT_GATEWAY}:4100"
     depends_on:
-      orders:
-        condition: service_started
+      # orders:
+      #   condition: service_started
       users:
         condition: service_started
-      products:
+      stories:
         condition: service_started
       db-seed:
         condition: service_completed_successfully

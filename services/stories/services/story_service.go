@@ -4,7 +4,8 @@ import (
 	"github.com/tagaertner/job-stories/services/stories/models"
 	"gorm.io/gorm"
 	"time"
-	"fmt"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"context"
 	"errors"
 )
@@ -48,11 +49,11 @@ func (s *StoryService) CreateStory(
 	input models.CreateStoryInput,
 ) (*models.JobStory, error) {
 	story := &models.JobStory{
-		ID:        fmt.Sprintf("story_%d", time.Now().UnixNano()),
+		ID:        uuid.New(),
 		UserID:    input.UserID,
 		Title:     input.Title,
 		Content:   input.Content,
-		Tags:      input.Tags,
+		Tags:      pq.StringArray(input.Tags),
 		Category:  input.Category,
 		Mood:      input.Mood,
 		CreatedAt: time.Now(),
@@ -71,9 +72,9 @@ func (s *StoryService)UpdateStory(
 	id string, 
 	input models.UpdateStoryInput)(*models.JobStory, error){
 
-	story := &models.JobStory{ID: id}
+	story := &models.JobStory{}
 
-	updates := s.db.WithContext(ctx).Model(&story)
+	updates := s.db.WithContext(ctx).Model(&story).Where("id= ?", id)
 
 	if input.Title != nil{
 		updates = updates.Update("title", *input.Title)

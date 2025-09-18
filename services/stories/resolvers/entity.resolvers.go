@@ -6,14 +6,16 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/tagaertner/job-stories/services/stories/generated"
 )
 
 // FindJobStoryByID is the resolver for the findJobStoryByID field.
 func (r *entityResolver) FindJobStoryByID(ctx context.Context, id string) (*generated.JobStory, error) {
-	panic(fmt.Errorf("not implemented: FindJobStoryByID - findJobStoryByID"))
+	story, err := r.StoryService.GetStoryByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return ToGraphQLStory(story), nil
 }
 
 // Entity returns generated.EntityResolver implementation.
