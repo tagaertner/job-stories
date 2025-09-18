@@ -20,43 +20,29 @@ INSERT INTO users (id, name, email, role, active) VALUES
 ('10', 'Lisa Garcia', 'lisa@example.com', 'customer', true)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO products (id, name, description, price, inventory) VALUES
-('1', 'MacBook Pro', '14-inch MacBook Pro with M3 chip', 1999.99, 10),
-('2', 'iPhone 15', 'Latest iPhone with A17 chip', 999.99, 25),
-('3', 'AirPods Pro', 'Wireless earbuds with noise cancellation', 249.99, 50),
-('4', 'iPad Pro', '12.9-inch iPad Pro with M2 chip', 1099.99, 15),
-('5', 'Apple Watch', 'Series 9 GPS + Cellular', 499.99, 30),
-('6', 'Magic Keyboard', 'Wireless keyboard for Mac', 199.99, 20),
-('7', 'Studio Display', '27-inch 5K Retina display', 1599.99, 8),
-('8', 'AirTag', 'Bluetooth tracking device', 29.99, 100),
-('9', 'HomePod mini', 'Smart speaker with Siri', 99.99, 25),
-('10', 'Mac Studio', 'Compact pro desktop with M2 Max', 3999.99, 5),
-('11', 'iPhone 14', 'Previous generation iPhone', 699.99, 40),
-('12', 'MacBook Air M2', '13-inch lightweight laptop', 1199.99, 12),
-('13', 'Magic Mouse', 'Wireless multi-touch mouse', 79.99, 35),
-('14', 'Apple Pencil', '2nd generation stylus for iPad', 129.99, 45),
-('15', 'Mac mini', 'Compact desktop computer', 599.99, 18)
+-- Wait for job_stories table
+DO $$
+BEGIN
+    WHILE NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'job_stories') LOOP
+        PERFORM pg_sleep(1);
+    END LOOP;
+END $$;
+-- Insert job stories for pagination testing
+INSERT INTO job_stories (id, user_id, title, content, tags, category, mood, created_at, updated_at) VALUES
+  ('1', '1', 'Fix login bug', 'Fixed OAuth issue during login.', ARRAY['auth', 'bugfix'], 'bug fix', '😤 pride', NOW(), NOW()),
+  ('2', '1', 'Refactor database layer', 'Simplified GORM repository logic.', ARRAY['refactor', 'gorm'], 'refactor', '😌 satisfaction', NOW(), NOW()),
+  ('3', '1', 'Wrote tests for payment', 'Added unit tests for payment gateway.', ARRAY['testing', 'payments'], 'testing', '💪 confidence', NOW(), NOW()),
+  ('4', '1', 'Added search filtering', 'Implemented tags/category filters.', ARRAY['search', 'filters'], 'feature', '🤔 curiosity', NOW(), NOW()),
+  ('5', '1', 'Story pagination', 'Paginated storiesByUser query.', ARRAY['pagination', 'graphql'], 'backend', '🚀 flow state euphoria', NOW(), NOW()),
+  ('6', '1', 'Improve Dockerfile', 'Optimized caching and layer ordering.', ARRAY['docker', 'devops'], 'infrastructure', '😮‍💨 relief', NOW(), NOW()),
+  ('7', '1', 'Updated README', 'Clarified setup and env configs.', ARRAY['docs', 'setup'], 'documentation', '🏆 accomplishment', NOW(), NOW()),
+  ('8', '1', 'Mock data support', 'Enabled mock mode for dev testing.', ARRAY['mock', 'dev'], 'tooling', '😴 boredom', NOW(), NOW()),
+  ('9', '1', 'CI pipeline added', 'Added Jenkins pipeline for Go builds.', ARRAY['ci', 'jenkins'], 'devops', '😤 determination', NOW(), NOW()),
+  ('10', '1', 'Error handling refactor', 'Improved structured logging.', ARRAY['logging', 'errors'], 'refactor', '😓 stress', NOW(), NOW()),
+  ('11', '1', 'GraphQL @key directive', 'Resolved subgraph federation bug.', ARRAY['graphql', 'federation'], 'bug fix', '😭 despair', NOW(), NOW()),
+  ('12', '1', 'Hooked up Gradio UI', 'Gradio is working locally.', ARRAY['ui', 'gradio'], 'frontend', '🤷‍♂️ self-doubt', NOW(), NOW()),
+  ('13', '1', 'Wrote entity resolver', 'Returned user from story.', ARRAY['graphql', 'resolvers'], 'backend', '😵‍💫 confusion', NOW(), NOW()),
+  ('14', '1', 'Postgres schema tweak', 'Updated constraints + GORM models.', ARRAY['postgres', 'gorm'], 'db', '😳 embarrassment', NOW(), NOW()),
+  ('15', '1', 'Added search indexing', 'Improved lookup speed on tags.', ARRAY['search', 'index'], 'performance', '⏰ impatience', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO orders (id, user_id, product_id, quantity, total_price, status) VALUES
-('1', '1', '1', 1, 1999.99, 'completed'),
-('2', '2', '2', 2, 1999.98, 'pending'),
-('3', '3', '3', 1, 249.99, 'shipped'),
-('4', '4', '4', 1, 1099.99, 'shipped'),
-('5', '5', '5', 2, 999.98, 'completed'),
-('6', '6', '6', 1, 199.99, 'pending'),
-('7', '4', '7', 1, 1599.99, 'completed'),
-('8', '8', '8', 4, 119.96, 'shipped'),
-('9', '9', '9', 1, 99.99, 'cancelled'),
-('10', '10', '10', 1, 3999.99, 'pending'),
-('11', '6', '11', 1, 699.99, 'completed'),
-('12', '4', '12', 1, 1199.99, 'shipped'),
-('13', '8', '13', 2, 159.98, 'completed'),
-('14', '5', '14', 3, 389.97, 'pending'),
-('15', '10', '15', 1, 599.99, 'shipped'),
-('16', '7', '2', 1, 999.99, 'cancelled'),
-('17', '6', '3', 2, 499.98, 'completed'),
-('18', '4', '1', 1, 1999.99, 'pending'),
-('19', '8', '8', 10, 299.90, 'completed'),
-('20', '10', '5', 1, 499.99, 'shipped')
-ON CONFLICT (id) DO NOTHING;

@@ -28,7 +28,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${PORT_PRODUCTS}:4101"
+      - "${PORT_STORIES}:4101"
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -137,14 +137,14 @@ services:
     ports:
       - "${PORT_GATEWAY}:4100"
     depends_on:
-      orders:
-        condition: service_started
+      # orders:
+      #   condition: service_started
       users:
         condition: service_started
-      products:
+      stories:
         condition: service_started
-      db-seed:
-        condition: service_completed_successfully
+      # db-seed:
+      #   condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:

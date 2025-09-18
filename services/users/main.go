@@ -18,7 +18,7 @@ import (
 	"github.com/tagaertner/job-stories/services/users/services"
 )
 
-const defaultPort = "4002"
+const defaultPort = "4102"
 
 func main() {
     // Only load .env file when not in Docker
