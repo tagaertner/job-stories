@@ -12,6 +12,13 @@ type JobStory @key(fields: "id") {
   updatedAt: String!
 }
 
+type PaginatedStories {
+  stories: [JobStory!]!
+  totalCount: Int!
+  currentPage: Int!
+  hasNextPage: Boolean!
+}
+
 input StoryFilter {
   tags: [String!]
   category: String
@@ -47,7 +54,7 @@ input DeleteStoryInput {
 type Query {
   stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
   story(id: ID!): JobStory
-  storiesByUser(userId: String!, filter: StoryFilter): [JobStory!]!
+  storiesByUser(userId: String!, page: Int = 1, pageSize: Int = 10): PaginatedStories!
 }
 
 type Mutation {

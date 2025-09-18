@@ -19,6 +19,13 @@ func (JobStory) IsEntity() {}
 type Mutation struct {
 }
 
+type PaginatedStories struct {
+	Stories     []*JobStory `json:"stories"`
+	TotalCount  int         `json:"totalCount"`
+	CurrentPage int         `json:"currentPage"`
+	HasNextPage bool        `json:"hasNextPage"`
+}
+
 type Query struct {
 }
 

@@ -3,7 +3,6 @@ package models
 import (
 	"time"
 )
-
 type JobStory struct {
     ID        string    `json:"id" gorm:"primaryKey"`
     UserID    string    `json:"userId" gorm:"not null"`
@@ -15,6 +14,11 @@ type JobStory struct {
     CreatedAt time.Time `json:"createdAt"`
     UpdatedAt time.Time `json:"updatedAt"`
 }
-
+type PaginatedStories struct {
+	Stories     []*JobStory `json:"stories"`
+	TotalCount  int         `json:"totalCount"`
+	CurrentPage int         `json:"currentPage"`
+	HasNextPage bool        `json:"hasNextPage"`
+}
 
 func (JobStory) IsEntity() {}
