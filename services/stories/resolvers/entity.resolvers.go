@@ -6,6 +6,7 @@ package resolvers
 
 import (
 	"context"
+
 	"github.com/tagaertner/job-stories/services/stories/generated"
 )
 

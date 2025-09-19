@@ -19,14 +19,23 @@ func (JobStory) IsEntity() {}
 type Mutation struct {
 }
 
-type PaginatedStories struct {
-	Stories     []*JobStory `json:"stories"`
-	TotalCount  int         `json:"totalCount"`
-	CurrentPage int         `json:"currentPage"`
-	HasNextPage bool        `json:"hasNextPage"`
+type PageInfo struct {
+	HasNextPage bool    `json:"hasNextPage"`
+	EndCursor   *string `json:"endCursor,omitempty"`
 }
 
 type Query struct {
+}
+
+type StoryConnection struct {
+	Edges      []*StoryEdge `json:"edges"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	TotalCount int          `json:"totalCount"`
+}
+
+type StoryEdge struct {
+	Cursor string    `json:"cursor"`
+	Node   *JobStory `json:"node"`
 }
 
 type StoryFilter struct {

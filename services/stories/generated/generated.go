@@ -70,19 +70,28 @@ type ComplexityRoot struct {
 		UpdateStory func(childComplexity int, input models.UpdateStoryInput) int
 	}
 
-	PaginatedStories struct {
-		CurrentPage func(childComplexity int) int
+	PageInfo struct {
+		EndCursor   func(childComplexity int) int
 		HasNextPage func(childComplexity int) int
-		Stories     func(childComplexity int) int
-		TotalCount  func(childComplexity int) int
 	}
 
 	Query struct {
-		Stories            func(childComplexity int, filter *StoryFilter, limit *int, offset *int) int
-		StoriesByUser      func(childComplexity int, userID string, page *int, pageSize *int) int
-		Story              func(childComplexity int, id string) int
-		__resolve__service func(childComplexity int) int
-		__resolve_entities func(childComplexity int, representations []map[string]any) int
+		Stories             func(childComplexity int, filter *StoryFilter, limit *int, offset *int) int
+		StoriesByUserCursor func(childComplexity int, userID string, after *string, first *int) int
+		Story               func(childComplexity int, id string) int
+		__resolve__service  func(childComplexity int) int
+		__resolve_entities  func(childComplexity int, representations []map[string]any) int
+	}
+
+	StoryConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	StoryEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	_Service struct {
@@ -101,7 +110,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Stories(ctx context.Context, filter *StoryFilter, limit *int, offset *int) ([]*JobStory, error)
 	Story(ctx context.Context, id string) (*JobStory, error)
-	StoriesByUser(ctx context.Context, userID string, page *int, pageSize *int) (*PaginatedStories, error)
+	StoriesByUserCursor(ctx context.Context, userID string, after *string, first *int) (*StoryConnection, error)
 }
 
 type executableSchema struct {
@@ -234,33 +243,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.UpdateStory(childComplexity, args["input"].(models.UpdateStoryInput)), true
 
-	case "PaginatedStories.currentPage":
-		if e.complexity.PaginatedStories.CurrentPage == nil {
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
 			break
 		}
 
-		return e.complexity.PaginatedStories.CurrentPage(childComplexity), true
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
 
-	case "PaginatedStories.hasNextPage":
-		if e.complexity.PaginatedStories.HasNextPage == nil {
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PaginatedStories.HasNextPage(childComplexity), true
-
-	case "PaginatedStories.stories":
-		if e.complexity.PaginatedStories.Stories == nil {
-			break
-		}
-
-		return e.complexity.PaginatedStories.Stories(childComplexity), true
-
-	case "PaginatedStories.totalCount":
-		if e.complexity.PaginatedStories.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.PaginatedStories.TotalCount(childComplexity), true
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
 
 	case "Query.stories":
 		if e.complexity.Query.Stories == nil {
@@ -274,17 +269,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Stories(childComplexity, args["filter"].(*StoryFilter), args["limit"].(*int), args["offset"].(*int)), true
 
-	case "Query.storiesByUser":
-		if e.complexity.Query.StoriesByUser == nil {
+	case "Query.storiesByUserCursor":
+		if e.complexity.Query.StoriesByUserCursor == nil {
 			break
 		}
 
-		args, err := ec.field_Query_storiesByUser_args(ctx, rawArgs)
+		args, err := ec.field_Query_storiesByUserCursor_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.StoriesByUser(childComplexity, args["userId"].(string), args["page"].(*int), args["pageSize"].(*int)), true
+		return e.complexity.Query.StoriesByUserCursor(childComplexity, args["userId"].(string), args["after"].(*string), args["first"].(*int)), true
 
 	case "Query.story":
 		if e.complexity.Query.Story == nil {
@@ -316,6 +311,41 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
+
+	case "StoryConnection.edges":
+		if e.complexity.StoryConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.StoryConnection.Edges(childComplexity), true
+
+	case "StoryConnection.pageInfo":
+		if e.complexity.StoryConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.StoryConnection.PageInfo(childComplexity), true
+
+	case "StoryConnection.totalCount":
+		if e.complexity.StoryConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.StoryConnection.TotalCount(childComplexity), true
+
+	case "StoryEdge.cursor":
+		if e.complexity.StoryEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.StoryEdge.Cursor(childComplexity), true
+
+	case "StoryEdge.node":
+		if e.complexity.StoryEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.StoryEdge.Node(childComplexity), true
 
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
@@ -447,11 +477,20 @@ type JobStory @key(fields: "id") {
   updatedAt: String!
 }
 
-type PaginatedStories {
-  stories: [JobStory!]!
+type StoryConnection {
+  edges: [StoryEdge!]!
+  pageInfo: PageInfo!
   totalCount: Int!
-  currentPage: Int!
+}
+
+type StoryEdge {
+  cursor: String!
+  node: JobStory!
+}
+
+type PageInfo {
   hasNextPage: Boolean!
+  endCursor: String
 }
 
 input StoryFilter {
@@ -489,7 +528,7 @@ input DeleteStoryInput {
 type Query {
   stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
   story(id: ID!): JobStory
-  storiesByUser(userId: String!, page: Int = 1, pageSize: Int = 10): PaginatedStories!
+  storiesByUserCursor(userId: ID!, after: String, first: Int = 5): StoryConnection!
 }
 
 type Mutation {
@@ -640,24 +679,24 @@ func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_storiesByUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_storiesByUserCursor_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userId", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "page", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
-	args["page"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pageSize", ec.unmarshalOInt2ᚖint)
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
-	args["pageSize"] = arg2
+	args["first"] = arg2
 	return args, nil
 }
 
@@ -1418,160 +1457,8 @@ func (ec *executionContext) fieldContext_Mutation_deleteStory(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _PaginatedStories_stories(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PaginatedStories_stories(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Stories, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*JobStory)
-	fc.Result = res
-	return ec.marshalNJobStory2ᚕᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐJobStoryᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PaginatedStories_stories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PaginatedStories",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_JobStory_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_JobStory_userId(ctx, field)
-			case "title":
-				return ec.fieldContext_JobStory_title(ctx, field)
-			case "content":
-				return ec.fieldContext_JobStory_content(ctx, field)
-			case "tags":
-				return ec.fieldContext_JobStory_tags(ctx, field)
-			case "category":
-				return ec.fieldContext_JobStory_category(ctx, field)
-			case "mood":
-				return ec.fieldContext_JobStory_mood(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_JobStory_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_JobStory_updatedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type JobStory", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PaginatedStories_totalCount(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PaginatedStories_totalCount(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PaginatedStories_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PaginatedStories",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PaginatedStories_currentPage(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PaginatedStories_currentPage(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CurrentPage, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PaginatedStories_currentPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PaginatedStories",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PaginatedStories_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PaginatedStories_hasNextPage(ctx, field)
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_hasNextPage(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1601,14 +1488,55 @@ func (ec *executionContext) _PaginatedStories_hasNextPage(ctx context.Context, f
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PaginatedStories_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PageInfo_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "PaginatedStories",
+		Object:     "PageInfo",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graphql.CollectedField, obj *PageInfo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PageInfo_endCursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PageInfo_endCursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1761,8 +1689,8 @@ func (ec *executionContext) fieldContext_Query_story(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_storiesByUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_storiesByUser(ctx, field)
+func (ec *executionContext) _Query_storiesByUserCursor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_storiesByUserCursor(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1775,7 +1703,7 @@ func (ec *executionContext) _Query_storiesByUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().StoriesByUser(rctx, fc.Args["userId"].(string), fc.Args["page"].(*int), fc.Args["pageSize"].(*int))
+		return ec.resolvers.Query().StoriesByUserCursor(rctx, fc.Args["userId"].(string), fc.Args["after"].(*string), fc.Args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1787,12 +1715,12 @@ func (ec *executionContext) _Query_storiesByUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*PaginatedStories)
+	res := resTmp.(*StoryConnection)
 	fc.Result = res
-	return ec.marshalNPaginatedStories2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx, field.Selections, res)
+	return ec.marshalNStoryConnection2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_storiesByUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_storiesByUserCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1800,16 +1728,14 @@ func (ec *executionContext) fieldContext_Query_storiesByUser(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "stories":
-				return ec.fieldContext_PaginatedStories_stories(ctx, field)
+			case "edges":
+				return ec.fieldContext_StoryConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_StoryConnection_pageInfo(ctx, field)
 			case "totalCount":
-				return ec.fieldContext_PaginatedStories_totalCount(ctx, field)
-			case "currentPage":
-				return ec.fieldContext_PaginatedStories_currentPage(ctx, field)
-			case "hasNextPage":
-				return ec.fieldContext_PaginatedStories_hasNextPage(ctx, field)
+				return ec.fieldContext_StoryConnection_totalCount(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PaginatedStories", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type StoryConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -1819,7 +1745,7 @@ func (ec *executionContext) fieldContext_Query_storiesByUser(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_storiesByUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_storiesByUserCursor_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2055,6 +1981,258 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StoryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *StoryConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StoryConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*StoryEdge)
+	fc.Result = res
+	return ec.marshalNStoryEdge2ᚕᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StoryConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StoryConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_StoryEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_StoryEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StoryEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StoryConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *StoryConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StoryConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StoryConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StoryConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StoryConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *StoryConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StoryConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StoryConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StoryConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StoryEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *StoryEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StoryEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StoryEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StoryEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StoryEdge_node(ctx context.Context, field graphql.CollectedField, obj *StoryEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StoryEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*JobStory)
+	fc.Result = res
+	return ec.marshalNJobStory2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐJobStory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StoryEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StoryEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobStory_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_JobStory_userId(ctx, field)
+			case "title":
+				return ec.fieldContext_JobStory_title(ctx, field)
+			case "content":
+				return ec.fieldContext_JobStory_content(ctx, field)
+			case "tags":
+				return ec.fieldContext_JobStory_tags(ctx, field)
+			case "category":
+				return ec.fieldContext_JobStory_category(ctx, field)
+			case "mood":
+				return ec.fieldContext_JobStory_mood(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobStory_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobStory_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobStory", field.Name)
 		},
 	}
 	return fc, nil
@@ -4499,37 +4677,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
-var paginatedStoriesImplementors = []string{"PaginatedStories"}
+var pageInfoImplementors = []string{"PageInfo"}
 
-func (ec *executionContext) _PaginatedStories(ctx context.Context, sel ast.SelectionSet, obj *PaginatedStories) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, paginatedStoriesImplementors)
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("PaginatedStories")
-		case "stories":
-			out.Values[i] = ec._PaginatedStories_stories(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "totalCount":
-			out.Values[i] = ec._PaginatedStories_totalCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "currentPage":
-			out.Values[i] = ec._PaginatedStories_currentPage(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+			out.Values[i] = graphql.MarshalString("PageInfo")
 		case "hasNextPage":
-			out.Values[i] = ec._PaginatedStories_hasNextPage(ctx, field, obj)
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "endCursor":
+			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4613,7 +4778,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "storiesByUser":
+		case "storiesByUserCursor":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -4622,7 +4787,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_storiesByUser(ctx, field)
+				res = ec._Query_storiesByUserCursor(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4687,6 +4852,99 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var storyConnectionImplementors = []string{"StoryConnection"}
+
+func (ec *executionContext) _StoryConnection(ctx context.Context, sel ast.SelectionSet, obj *StoryConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, storyConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StoryConnection")
+		case "edges":
+			out.Values[i] = ec._StoryConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._StoryConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._StoryConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var storyEdgeImplementors = []string{"StoryEdge"}
+
+func (ec *executionContext) _StoryEdge(ctx context.Context, sel ast.SelectionSet, obj *StoryEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, storyEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StoryEdge")
+		case "cursor":
+			out.Values[i] = ec._StoryEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._StoryEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5208,18 +5466,82 @@ func (ec *executionContext) marshalNJobStory2ᚖgithubᚗcomᚋtagaertnerᚋjob�
 	return ec._JobStory(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPaginatedStories2githubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx context.Context, sel ast.SelectionSet, v PaginatedStories) graphql.Marshaler {
-	return ec._PaginatedStories(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNPaginatedStories2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx context.Context, sel ast.SelectionSet, v *PaginatedStories) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._PaginatedStories(ctx, sel, v)
+	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStoryConnection2githubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryConnection(ctx context.Context, sel ast.SelectionSet, v StoryConnection) graphql.Marshaler {
+	return ec._StoryConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStoryConnection2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryConnection(ctx context.Context, sel ast.SelectionSet, v *StoryConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StoryConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStoryEdge2ᚕᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*StoryEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStoryEdge2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNStoryEdge2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryEdge(ctx context.Context, sel ast.SelectionSet, v *StoryEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StoryEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
