@@ -12,11 +12,20 @@ type JobStory @key(fields: "id") {
   updatedAt: String!
 }
 
-type PaginatedStories {
-  stories: [JobStory!]!
+type StoryConnection {
+  edges: [StoryEdge!]!
+  pageInfo: PageInfo!
   totalCount: Int!
-  currentPage: Int!
+}
+
+type StoryEdge {
+  cursor: String!
+  node: JobStory!
+}
+
+type PageInfo {
   hasNextPage: Boolean!
+  endCursor: String
 }
 
 input StoryFilter {
@@ -54,7 +63,7 @@ input DeleteStoryInput {
 type Query {
   stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
   story(id: ID!): JobStory
-  storiesByUser(userId: String!, page: Int = 1, pageSize: Int = 10): PaginatedStories!
+  storiesByUserCursor(userId: ID!, after: String, first: Int = 5): StoryConnection!
 }
 
 type Mutation {
