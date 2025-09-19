@@ -6,7 +6,6 @@ import (
     "github.com/google/uuid"
     "github.com/lib/pq"
 )
-
 type JobStory struct {
     ID        uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
     UserID    string          `json:"userId"`
@@ -19,11 +18,5 @@ type JobStory struct {
     UpdatedAt time.Time       `json:"updatedAt"`
 }
 
-func (s *JobStory) BeforeCreate(tx *gorm.DB) (err error) {
-	if s.ID == uuid.Nil {
-		s.ID = uuid.New()
-	}
-	return
-}
 
 func (JobStory) IsEntity() {}

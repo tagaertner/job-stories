@@ -70,9 +70,16 @@ type ComplexityRoot struct {
 		UpdateStory func(childComplexity int, input models.UpdateStoryInput) int
 	}
 
+	PaginatedStories struct {
+		CurrentPage func(childComplexity int) int
+		HasNextPage func(childComplexity int) int
+		Stories     func(childComplexity int) int
+		TotalCount  func(childComplexity int) int
+	}
+
 	Query struct {
 		Stories            func(childComplexity int, filter *StoryFilter, limit *int, offset *int) int
-		StoriesByUser      func(childComplexity int, userID string, filter *StoryFilter) int
+		StoriesByUser      func(childComplexity int, userID string, page *int, pageSize *int) int
 		Story              func(childComplexity int, id string) int
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]any) int
@@ -94,7 +101,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Stories(ctx context.Context, filter *StoryFilter, limit *int, offset *int) ([]*JobStory, error)
 	Story(ctx context.Context, id string) (*JobStory, error)
-	StoriesByUser(ctx context.Context, userID string, filter *StoryFilter) ([]*JobStory, error)
+	StoriesByUser(ctx context.Context, userID string, page *int, pageSize *int) (*PaginatedStories, error)
 }
 
 type executableSchema struct {
@@ -227,6 +234,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.UpdateStory(childComplexity, args["input"].(models.UpdateStoryInput)), true
 
+	case "PaginatedStories.currentPage":
+		if e.complexity.PaginatedStories.CurrentPage == nil {
+			break
+		}
+
+		return e.complexity.PaginatedStories.CurrentPage(childComplexity), true
+
+	case "PaginatedStories.hasNextPage":
+		if e.complexity.PaginatedStories.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PaginatedStories.HasNextPage(childComplexity), true
+
+	case "PaginatedStories.stories":
+		if e.complexity.PaginatedStories.Stories == nil {
+			break
+		}
+
+		return e.complexity.PaginatedStories.Stories(childComplexity), true
+
+	case "PaginatedStories.totalCount":
+		if e.complexity.PaginatedStories.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.PaginatedStories.TotalCount(childComplexity), true
+
 	case "Query.stories":
 		if e.complexity.Query.Stories == nil {
 			break
@@ -249,7 +284,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.StoriesByUser(childComplexity, args["userId"].(string), args["filter"].(*StoryFilter)), true
+		return e.complexity.Query.StoriesByUser(childComplexity, args["userId"].(string), args["page"].(*int), args["pageSize"].(*int)), true
 
 	case "Query.story":
 		if e.complexity.Query.Story == nil {
@@ -412,6 +447,13 @@ type JobStory @key(fields: "id") {
   updatedAt: String!
 }
 
+type PaginatedStories {
+  stories: [JobStory!]!
+  totalCount: Int!
+  currentPage: Int!
+  hasNextPage: Boolean!
+}
+
 input StoryFilter {
   tags: [String!]
   category: String
@@ -447,7 +489,7 @@ input DeleteStoryInput {
 type Query {
   stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
   story(id: ID!): JobStory
-  storiesByUser(userId: String!, filter: StoryFilter): [JobStory!]!
+  storiesByUser(userId: String!, page: Int = 1, pageSize: Int = 10): PaginatedStories!
 }
 
 type Mutation {
@@ -606,11 +648,16 @@ func (ec *executionContext) field_Query_storiesByUser_args(ctx context.Context, 
 		return nil, err
 	}
 	args["userId"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOStoryFilter2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐStoryFilter)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "page", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
-	args["filter"] = arg1
+	args["page"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "pageSize", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["pageSize"] = arg2
 	return args, nil
 }
 
@@ -1371,6 +1418,202 @@ func (ec *executionContext) fieldContext_Mutation_deleteStory(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _PaginatedStories_stories(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginatedStories_stories(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Stories, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*JobStory)
+	fc.Result = res
+	return ec.marshalNJobStory2ᚕᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐJobStoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginatedStories_stories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginatedStories",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobStory_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_JobStory_userId(ctx, field)
+			case "title":
+				return ec.fieldContext_JobStory_title(ctx, field)
+			case "content":
+				return ec.fieldContext_JobStory_content(ctx, field)
+			case "tags":
+				return ec.fieldContext_JobStory_tags(ctx, field)
+			case "category":
+				return ec.fieldContext_JobStory_category(ctx, field)
+			case "mood":
+				return ec.fieldContext_JobStory_mood(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobStory_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobStory_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobStory", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginatedStories_totalCount(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginatedStories_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginatedStories_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginatedStories",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginatedStories_currentPage(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginatedStories_currentPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrentPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginatedStories_currentPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginatedStories",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginatedStories_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *PaginatedStories) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginatedStories_hasNextPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginatedStories_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginatedStories",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_stories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_stories(ctx, field)
 	if err != nil {
@@ -1532,7 +1775,7 @@ func (ec *executionContext) _Query_storiesByUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().StoriesByUser(rctx, fc.Args["userId"].(string), fc.Args["filter"].(*StoryFilter))
+		return ec.resolvers.Query().StoriesByUser(rctx, fc.Args["userId"].(string), fc.Args["page"].(*int), fc.Args["pageSize"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1544,9 +1787,9 @@ func (ec *executionContext) _Query_storiesByUser(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*JobStory)
+	res := resTmp.(*PaginatedStories)
 	fc.Result = res
-	return ec.marshalNJobStory2ᚕᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐJobStoryᚄ(ctx, field.Selections, res)
+	return ec.marshalNPaginatedStories2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_storiesByUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1557,26 +1800,16 @@ func (ec *executionContext) fieldContext_Query_storiesByUser(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_JobStory_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_JobStory_userId(ctx, field)
-			case "title":
-				return ec.fieldContext_JobStory_title(ctx, field)
-			case "content":
-				return ec.fieldContext_JobStory_content(ctx, field)
-			case "tags":
-				return ec.fieldContext_JobStory_tags(ctx, field)
-			case "category":
-				return ec.fieldContext_JobStory_category(ctx, field)
-			case "mood":
-				return ec.fieldContext_JobStory_mood(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_JobStory_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_JobStory_updatedAt(ctx, field)
+			case "stories":
+				return ec.fieldContext_PaginatedStories_stories(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PaginatedStories_totalCount(ctx, field)
+			case "currentPage":
+				return ec.fieldContext_PaginatedStories_currentPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PaginatedStories_hasNextPage(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type JobStory", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type PaginatedStories", field.Name)
 		},
 	}
 	defer func() {
@@ -4266,6 +4499,60 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var paginatedStoriesImplementors = []string{"PaginatedStories"}
+
+func (ec *executionContext) _PaginatedStories(ctx context.Context, sel ast.SelectionSet, obj *PaginatedStories) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, paginatedStoriesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PaginatedStories")
+		case "stories":
+			out.Values[i] = ec._PaginatedStories_stories(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._PaginatedStories_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "currentPage":
+			out.Values[i] = ec._PaginatedStories_currentPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._PaginatedStories_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -4847,6 +5134,22 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNJobStory2githubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐJobStory(ctx context.Context, sel ast.SelectionSet, v JobStory) graphql.Marshaler {
 	return ec._JobStory(ctx, sel, &v)
 }
@@ -4903,6 +5206,20 @@ func (ec *executionContext) marshalNJobStory2ᚖgithubᚗcomᚋtagaertnerᚋjob�
 		return graphql.Null
 	}
 	return ec._JobStory(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPaginatedStories2githubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx context.Context, sel ast.SelectionSet, v PaginatedStories) graphql.Marshaler {
+	return ec._PaginatedStories(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPaginatedStories2ᚖgithubᚗcomᚋtagaertnerᚋjobᚑstoriesᚋservicesᚋstoriesᚋgeneratedᚐPaginatedStories(ctx context.Context, sel ast.SelectionSet, v *PaginatedStories) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PaginatedStories(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {

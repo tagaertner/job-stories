@@ -25,16 +25,29 @@ INSERT INTO users (id, name, email, role, active) VALUES
 ('10', 'Lisa Garcia', 'lisa@example.com', 'writer', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Seed job_stories
+-- Wait for job_stories table
+DO $$
+BEGIN
+    WHILE NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'job_stories') LOOP
+        PERFORM pg_sleep(1);
+    END LOOP;
+END $$;
+-- Insert job stories for pagination testing
 INSERT INTO job_stories (id, user_id, title, content, tags, category, mood, created_at, updated_at) VALUES
-('101', '1', 'Got promoted!', 'I finally got promoted after 2 years of effort.', ARRAY['promotion', 'career'], 'win', 'happy', NOW(), NOW()),
-('102', '2', 'Failed deployment', 'Had a major bug in prod, learned a lot fixing it.', ARRAY['deployment', 'bug'], 'fail', 'frustrated', NOW(), NOW()),
-('103', '3', 'First PR merged', 'My first pull request got accepted!', ARRAY['github', 'code'], 'win', 'proud', NOW(), NOW()),
-('104', '4', 'Interview gone wrong', 'Forgot to share screen in an interview.', ARRAY['interview', 'oops'], 'fail', 'embarrassed', NOW(), NOW()),
-('105', '5', 'Refactored legacy code', 'Cleaned up a huge mess in our codebase.', ARRAY['refactor', 'legacy'], 'win', 'satisfied', NOW(), NOW()),
-('106', '6', 'Got rejected again', 'Another job rejection, but I will not give up.', ARRAY['jobhunt', 'rejection'], 'fail', 'resilient', NOW(), NOW()),
-('107', '7', 'Built a dashboard', 'Created a useful dashboard for team metrics.', ARRAY['dashboard', 'metrics'], 'win', 'accomplished', NOW(), NOW()),
-('108', '8', 'Mentored new dev', 'Helped onboard a junior engineer.', ARRAY['mentorship', 'team'], 'win', 'supportive', NOW(), NOW()),
-('109', '9', 'Bad sprint planning', 'Estimated 5 tasks, finished only 2.', ARRAY['agile', 'planning'], 'fail', 'reflective', NOW(), NOW()),
-('110', '10', 'Late night deploy', 'Had to hotfix at 2 AM 😴', ARRAY['hotfix', 'prod'], 'fail', 'tired', NOW(), NOW())
+  ('1', '1', 'Fix login bug', 'Fixed OAuth issue during login.', ARRAY['auth', 'bugfix'], 'bug fix', '😤 pride', NOW(), NOW()),
+  ('2', '1', 'Refactor database layer', 'Simplified GORM repository logic.', ARRAY['refactor', 'gorm'], 'refactor', '😌 satisfaction', NOW(), NOW()),
+  ('3', '1', 'Wrote tests for payment', 'Added unit tests for payment gateway.', ARRAY['testing', 'payments'], 'testing', '💪 confidence', NOW(), NOW()),
+  ('4', '1', 'Added search filtering', 'Implemented tags/category filters.', ARRAY['search', 'filters'], 'feature', '🤔 curiosity', NOW(), NOW()),
+  ('5', '1', 'Story pagination', 'Paginated storiesByUser query.', ARRAY['pagination', 'graphql'], 'backend', '🚀 flow state euphoria', NOW(), NOW()),
+  ('6', '1', 'Improve Dockerfile', 'Optimized caching and layer ordering.', ARRAY['docker', 'devops'], 'infrastructure', '😮‍💨 relief', NOW(), NOW()),
+  ('7', '1', 'Updated README', 'Clarified setup and env configs.', ARRAY['docs', 'setup'], 'documentation', '🏆 accomplishment', NOW(), NOW()),
+  ('8', '1', 'Mock data support', 'Enabled mock mode for dev testing.', ARRAY['mock', 'dev'], 'tooling', '😴 boredom', NOW(), NOW()),
+  ('9', '1', 'CI pipeline added', 'Added Jenkins pipeline for Go builds.', ARRAY['ci', 'jenkins'], 'devops', '😤 determination', NOW(), NOW()),
+  ('10', '1', 'Error handling refactor', 'Improved structured logging.', ARRAY['logging', 'errors'], 'refactor', '😓 stress', NOW(), NOW()),
+  ('11', '1', 'GraphQL @key directive', 'Resolved subgraph federation bug.', ARRAY['graphql', 'federation'], 'bug fix', '😭 despair', NOW(), NOW()),
+  ('12', '1', 'Hooked up Gradio UI', 'Gradio is working locally.', ARRAY['ui', 'gradio'], 'frontend', '🤷‍♂️ self-doubt', NOW(), NOW()),
+  ('13', '1', 'Wrote entity resolver', 'Returned user from story.', ARRAY['graphql', 'resolvers'], 'backend', '😵‍💫 confusion', NOW(), NOW()),
+  ('14', '1', 'Postgres schema tweak', 'Updated constraints + GORM models.', ARRAY['postgres', 'gorm'], 'db', '😳 embarrassment', NOW(), NOW()),
+  ('15', '1', 'Added search indexing', 'Improved lookup speed on tags.', ARRAY['search', 'index'], 'performance', '⏰ impatience', NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
+

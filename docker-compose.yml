@@ -151,8 +151,8 @@ services:
         condition: service_started
       stories:
         condition: service_started
-      db-seed:
-        condition: service_completed_successfully
+      # db-seed:
+      #   condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:

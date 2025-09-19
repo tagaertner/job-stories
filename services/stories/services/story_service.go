@@ -34,12 +34,28 @@ func (s *StoryService) GetStoryByID(id string) (*models.JobStory, error) {
 	return &story, nil
 }
 
-func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string) ([]*models.JobStory, error) {
-    var stories []*models.JobStory
-    if err := s.db.WithContext(ctx).Where("user_id = ?", userID).Find(&stories).Error; err != nil {
-        return nil, err
-    }
-    return stories, nil
+func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string, page int, pageSize int) ([]*models.JobStory, int, error) {
+	var stories []*models.JobStory
+	var total int64
+
+	offset := (page - 1) * pageSize
+
+	// Get total count
+	if err := s.db.Model(&models.JobStory{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	if err := s.db.
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&stories).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return stories, int(total), nil
 }
 
 

@@ -38,7 +38,7 @@ func (r *mutationResolver) UpdateStory(ctx context.Context, input models.UpdateS
 
 // DeleteStory is the resolver for the deleteStory field.
 func (r *mutationResolver) DeleteStory(ctx context.Context, input *models.DeleteStoryInput) (bool, error) {
-    return r.StoryService.DeleteStory(ctx, input)
+	return r.StoryService.DeleteStory(ctx, input)
 }
 
 // Stories is the resolver for the stories field.
@@ -60,13 +60,29 @@ func (r *queryResolver) Story(ctx context.Context, id string) (*generated.JobSto
 }
 
 // StoriesByUser is the resolver for the storiesByUser field.
-func (r *queryResolver) StoriesByUser(ctx context.Context, userID string, filter *generated.StoryFilter) ([]*generated.JobStory, error) {
-	story, err := r.StoryService.GetStoriesByUser(ctx, userID)
-	if err != nil {
+func (r *queryResolver) StoriesByUser(ctx context.Context, userID string, page *int, pageSize *int) (*generated.PaginatedStories, error) {
+	p := 1
+	ps := 2 
+	if page != nil {
+		p = *page
+	}
+	if pageSize != nil{
+		ps = *pageSize
+	}
+
+	stories, total, err := r.StoryService.GetStoriesByUser(ctx, userID, p, ps)
+	if err != nil{
 		return nil, err
 	}
-	return ToGraphQLStoryList(story), nil
-}
+	return &generated.PaginatedStories{
+		Stories: ToGraphQLStoryList(stories),
+		TotalCount: total,
+		CurrentPage: p,
+		HasNextPage: (p *ps) < total,
+	}, 
+		nil
+	}
+
 
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
