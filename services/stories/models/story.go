@@ -2,7 +2,6 @@ package models
 
 import (
 	"time"
-    "gorm.io/gorm"
     "github.com/google/uuid"
     "github.com/lib/pq"
 )
@@ -17,6 +16,11 @@ type JobStory struct {
     CreatedAt time.Time       `json:"createdAt"`
     UpdatedAt time.Time       `json:"updatedAt"`
 }
-
+type PaginatedStories struct {
+	Stories     []*JobStory `json:"stories"`
+	TotalCount  int         `json:"totalCount"`
+	CurrentPage int         `json:"currentPage"`
+	HasNextPage bool        `json:"hasNextPage"`
+}
 
 func (JobStory) IsEntity() {}
