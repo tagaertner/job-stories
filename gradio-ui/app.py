@@ -1,12 +1,14 @@
 import gradio as gr
+from graphql_client import create_story
 
 
 def submit_story(title, content, tags_string, category, mood):
     tags_list = [tag.strip() for tag in tags_string.split(',')]
-    return f"Story submitted:\n\nTitle: {title}\nContent: {content}\nTags: {', '.join(tags_list)}\nCategory: {category}\nMood: {mood}\n "
- 
+    
+    
 with gr.Blocks() as demo:
-    gr.Markdown("## Submit a Job Story")
+    gr.Markdown("## ✍️ Submit a Job Story")
+    
     title = gr.Textbox(label="Title")
     content = gr.Textbox(label="Content", lines=5)
     tags_string = gr.Textbox(label="Tags", placeholder="e.g., ai, startup, remote work")
@@ -44,4 +46,4 @@ with gr.Blocks() as demo:
     submit.click(fn=submit_story, inputs=[title, content, tags_string, category, mood], outputs=output)
     
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(server_name="0.0.0.0", server_port=4103)

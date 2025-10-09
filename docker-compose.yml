@@ -76,15 +76,15 @@ services:
 
   # 🎨 Gradio Frontend Service (Python) need lots of work
   gradio-ui:
-  build:
-    context: .
-    dockerfile: gradio-ui/Dockerfile
-  ports:
-    - "${PORT_GRADIO}:4103"
-  depends_on:
-    - gateway
-  env_file:
-    - .env
+    build:
+      context: .
+      dockerfile: gradio-ui/Dockerfile
+    ports:
+      - "${PORT_GRADIO}:4103"
+    depends_on:
+      - gateway
+    env_file:
+      - .env
 
   #   env_file:
   #     - .env
