@@ -3,9 +3,9 @@ import os
 
 GQL_ENDPOINT = os.getenv("GRAPHQL_ENDPOINT", "http://gateway:4100/graphql")
 
-def create_story(title, content, tags, category, mood):
+def create_story(input_data):
     mutation = """ 
-    mutation CreateStroy($input: CreateStoryInput!){
+    mutation CreateStory($input: CreateStoryInput!){
         createStory(input: $input){
             id
             title
@@ -17,52 +17,46 @@ def create_story(title, content, tags, category, mood):
         }
     }
     """
-    
-    variables = {
-        "input":{
-            "title": title,
-            "content": content,
-            "tags": tags,
-            "category": category,
-            "mood": mood,
-        }
-    }
-    
     try:
-        response = requests.post(GQL_ENDPOINT, json={"query": mutation, "variables": variables})
+        response = requests.post(
+            GQL_ENDPOINT,
+            json={"query":mutation, "variables": {"input": input_data}},
+            headers={"Content-Type": "application/json"}
+        )
         response.raise_for_status()
         data = response.json()
-
+        
         if "errors" in data:
-            return f"⚠️ GraphQL Error: {data['errors'][0]['message']}"
-
-        story = data["data"]["createStory"]
-        return f"✅ Story created!\n\nTitle: {story['title']}\nCategory: {story['category']}\nMood: {story['mood']}"
-
-    except Exception as e:
-        return f"❌ Failed to submit story: {e}"
+            return {"error": data["errors"][0]["message"]}
+        return data["data"]
     
-def get_stories(limit=10, after=None):
-    query ="""
-    query GetStories($limit: Int, $after: String) {
-        stories(first: $limit, after: $after){
+    except Exception as e:
+        return {"error": f"❌ Failed to submit story: {e}"}
+   
+    
+def get_stories(limit=10, offset=0):
+    query = """
+    query GetStories($limit: Int, $offset: Int) {
+        stories(limit: $limit, offset: $offset) {
             id
             title
-            content
-            tags
             category
             mood
-            createAt
+            tags
+            createdAt
         }
     }
     """
     
-    variables = {"limit": limit}
-    if after:
-        variables["after"] = after
+    variables = {"limit": limit, "offset": offset}
         
     try:
-        response = requests.post(GQL_ENDPOINT, json={"query": query, "variables": variables})
+        response = requests.post(
+            GQL_ENDPOINT, 
+            json={"query": query, 
+                  "variables": variables},
+            headers={"Content-Type": "application/json"},
+            )
         response.raise_for_status()
         data = response.json()
 
