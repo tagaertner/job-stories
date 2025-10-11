@@ -68,3 +68,38 @@ def get_stories(limit=10, offset=0):
 
     except Exception as e:
         return f"❌ Failed to fetch stories: {e}"
+    
+# todo update
+def update_story(input_data):
+    mutation = """ 
+    mutation UpdateStory($input: UpdateStoryInput!){
+        updateStory(input: $input){
+            id
+            userId
+            title
+            content
+            tags
+            category
+            mood
+            createdAt
+            updatedAt
+        }
+    }
+    """
+    
+    try:
+        response = requests.post(
+            GQL_ENDPOINT,
+            json={"query":mutation, "variables": {"input": input_data}},
+            headers={"Content-Type": "application/json"}
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        if "errors" in data:
+            return {"error": data["errors"][0]["message"]}
+        return data["data"]
+    
+    except Exception as e:
+        return {"error": f"❌ Failed to update story: {e}"}
+# todo delete
