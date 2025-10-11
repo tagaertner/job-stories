@@ -1,6 +1,6 @@
 # gradio-ui/app.py
 import gradio as gr
-from graphql_client import create_story, get_stories, update_story
+from graphql_client import create_story, get_stories, update_story, delete_story
 
 # TODO (JWT Integration Reminder):
 # ---------------------------------------------------------
@@ -42,7 +42,7 @@ def submit_story(title, content, tags_string, category, mood):
     
     
     if "createStory" not in result:
-        return f"❌ Error: Unexpected response format: {result}",fetch_stories(10), title, content, tags_string, category, mood  # ✅ Now 7 values
+        return f"❌ Error: Unexpected response format: {result}",fetch_stories(10), title, content, tags_string, category, mood  
     
     
     story = result["createStory"]
@@ -50,6 +50,7 @@ def submit_story(title, content, tags_string, category, mood):
 
     return message, fetch_stories(10), "", "", "", "", ""
 
+# todo add the click to copy the id
 def fetch_stories(limit):
     stories = get_stories(limit)
 
@@ -70,6 +71,8 @@ def fetch_stories(limit):
             s.get("createdAt", "")
         ])
     return table_data
+
+# Todo load story for edit
 
 # todo update story
 def change_story(story_id,title, content, tags_string, category, mood):
@@ -107,16 +110,42 @@ def change_story(story_id,title, content, tags_string, category, mood):
     
     story = result["updateStory"]
     return f"✅ Updated!\n\nTitle: {story['title']}\nUpdated: {story['updatedAt']}", fetch_stories(10)
-    
-# todo delete story
 
+# todo add "are you sure you want to delete message with click"
+def remove_story(story_id):
+    # Validate
+    if not story_id:
+        return "❌ Error: Story ID is required", fetch_stories(10)
+    
+    # Build input data
+    input_data ={
+        "id": story_id,
+    }
+    result = delete_story(input_data)
+    
+    # DEBUG: Print what we're getting back
+    print(f"🔍 Debug - Full result: {result}")
+    print(f"🔍 Debug - deleteStory value: {result.get('deleteStory')}")
+    
+    # Handle response
+    if "error" in result:
+        return f"❌ Error: {result['error']}", fetch_stories(10)  
+    
+    
+    if result.get("deleteStory") == True:
+        return f"✅  Story ID:{story_id} was deleted!", fetch_stories(10)
+    else:
+        return f"❌ Story not found or could not be deleted",fetch_stories(10)
+    
 # ✅ 
+# Todo change to dropdown menue bar
 with gr.Blocks() as demo:
     gr.Markdown("# 🧠 Job Stories Portal")
 
     limit_state = gr.State(value=10)
     
     # --- Submit Story Tab ---
+    # Todo add AI-powered Grammar Check Button. 
     with gr.Tab("📝 Submit Story"):
         title = gr.Textbox(label="Title")
         content = gr.Textbox(label="Content", lines=5)
@@ -136,10 +165,11 @@ with gr.Blocks() as demo:
         )
 
         submit = gr.Button("Submit")
-        output = gr.Textbox(label="Response", lines=6)
+        output = gr.Textbox(label="Confirmation", lines=6)
         # submit.click(fn=submit_story, inputs=[title, content, tags_string, category, mood], outputs=output)
 
     # --- View Stories Tab ---
+    # Todo fix the gr.Slider even thought it says 10, more are appearing
     with gr.Tab("👀 View Stories"):
         gr.Markdown("### Recently Created Stories")
         limit = gr.Slider(1, 50, value=10, step=1, label="Number of Stories")
@@ -152,12 +182,10 @@ with gr.Blocks() as demo:
             value=fetch_stories(10),
         )
         fetch_btn.click(fetch_stories, inputs=[limit], outputs=[table])
-        limit.change(lambda x: x, inputs=[limit], outputs=[limit_state])
-    
-        # submit = gr.Button("Submit")
-        # output = gr.Textbox(label="Response", lines=6)     
+        limit.change(lambda x: x, inputs=[limit], outputs=[limit_state])    
     
     #--- Update Story Tab ---
+    # Todo add AI-powered Grammar Check Button
     with gr.Tab("📝 Update Story"):
         gr.Markdown("### Update Existing Story")
         gr.Markdown("💡 *Copy a Story ID form the View Stories tab*")
@@ -181,8 +209,17 @@ with gr.Blocks() as demo:
         )
         
         update_btn = gr.Button("Update Story")
-        update_output = gr.Textbox(label="Response", lines=6)
+        update_output = gr.Textbox(label="Confirmation", lines=6)
     
+    #--- Delete Story Tab ---
+    with gr.Tab("🗑️ Delete Story"):
+        gr.Markdown("### Delete Existing story")
+        gr.Markdown("⚠️ *This action cannot be undone!*")
+        
+        delete_id = gr.Text(label="Story ID *", placeholder="e.g.,7b12c3df-8ebe-4d7a-aaa3-3d06ad40b576")
+        delete_btn = gr.Button("Delete Story", variant="stop")
+        delete_output = gr.Textbox(label="Confirmation", lines=6)
+        
     submit.click(
     fn=submit_story,
     inputs=[title, content, tags_string, category, mood],
@@ -197,12 +234,17 @@ with gr.Blocks() as demo:
     ]
 )
     
-      
+    
     update_btn.click(
         fn=change_story,
         inputs=[update_id, update_title, update_content, update_tags, update_category, update_mood],
         outputs=[update_output, table]  
     )
-        
+      
+    delete_btn.click(
+    fn=remove_story,
+    inputs=[delete_id],
+    outputs=[delete_output, table]
+    )  
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=4103)
