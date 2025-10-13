@@ -6,6 +6,7 @@ import (
 	"time"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/tagaertner/job-stories/services/stories/generated"
 	"context"
 	"errors"
 )
@@ -18,9 +19,53 @@ func NewStoryService(db *gorm.DB) *StoryService {
 	return &StoryService{db: db}
 }
 
-func (s *StoryService) GetAllStories() ([]*models.JobStory, error) {
+func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, offset *int) ([]*models.JobStory, error)  {
 	var stories []*models.JobStory
-	if err := s.db.Find(&stories).Error; err != nil {
+	
+	// Set default values
+	defaultLimit := 100
+	defaultOffset := 0
+	
+	if limit != nil{
+		defaultLimit = *limit
+	}
+	if offset != nil{
+		defaultOffset = *offset
+
+	}
+
+	// Start building query
+	query := s.db.Model((&models.JobStory{}))
+
+	// Apply filers
+	if filter != nil {
+		if filter.Category != nil {
+			query = query.Where("category = ?", *filter.Category)
+		}
+		if filter.Mood != nil {
+			query = query.Where("mood = ?", *filter.Mood)
+		}
+		if filter.Tags != nil && len(filter.Tags) > 0 {
+			query = query.Where("tags && ?", pq.Array(filter.Tags))
+		}
+		if filter.SearchText != nil {
+			searchPattern := "%" + *filter.SearchText + "%"
+			query = query.Where("title ILIKE ? OR content ILIKE ?", searchPattern, searchPattern)
+		}
+		if filter.DateFrom != nil {
+			query = query.Where("created_at >= ?", *filter.DateFrom)
+		}
+		if filter.DateTo != nil {
+			query = query.Where("created_at <= ?", *filter.DateTo)
+		}
+	}
+
+	// Apply limit and offset to query
+	if err :=s.db.
+	Limit(defaultLimit).
+	Offset(defaultOffset).
+	Order("created_at DESC").
+	Find(&stories).Error; err != nil{
 		return nil, err
 	}
 	return stories, nil

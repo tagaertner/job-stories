@@ -44,11 +44,11 @@ func (r *mutationResolver) DeleteStory(ctx context.Context, input *models.Delete
 
 // Stories is the resolver for the stories field.
 func (r *queryResolver) Stories(ctx context.Context, filter *generated.StoryFilter, limit *int, offset *int) ([]*generated.JobStory, error) {
-	story, err := r.StoryService.GetAllStories()
+	stories, err := r.StoryService.GetAllStories(filter, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	return ToGraphQLStoryList(story), nil
+	return ToGraphQLStoryList(stories), nil
 }
 
 // Story is the resolver for the story field.
