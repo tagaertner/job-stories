@@ -50,7 +50,6 @@ def submit_story(title, content, tags_string, category, mood):
 
     return message, fetch_stories(10), "", "", "", "", ""
 
-# todo add the click to copy the id
 def fetch_stories(limit):
     stories = get_stories(limit)
 
@@ -111,6 +110,19 @@ def change_story(story_id,title, content, tags_string, category, mood):
     story = result["updateStory"]
     return f"✅ Updated!\n\nTitle: {story['title']}\nUpdated: {story['updatedAt']}", fetch_stories(10)
 
+# for copy and past in view
+def get_selected_id(event_data:gr.SelectData):
+    # Check whihc column was clicked
+    col_index = event_data.index[1]
+    
+    # only process if ID column 0 was clicked
+    if col_index !=0:
+        return "", ""
+    story_id = event_data.value
+    return story_id, f"📋 Selected: {story_id}\n\n👉 Now click 'Send to Update' or 'Send to Delete'"
+
+
+
 # todo add "are you sure you want to delete message with click"
 def remove_story(story_id):
     # Validate
@@ -122,10 +134,6 @@ def remove_story(story_id):
         "id": story_id,
     }
     result = delete_story(input_data)
-    
-    # DEBUG: Print what we're getting back
-    print(f"🔍 Debug - Full result: {result}")
-    print(f"🔍 Debug - deleteStory value: {result.get('deleteStory')}")
     
     # Handle response
     if "error" in result:
@@ -143,6 +151,8 @@ with gr.Blocks() as demo:
     gr.Markdown("# 🧠 Job Stories Portal")
 
     limit_state = gr.State(value=10)
+    # store the selected ID temp
+    selected_id_state = gr.State(value="")
     
     # --- Submit Story Tab ---
     # Todo add AI-powered Grammar Check Button. 
@@ -172,15 +182,25 @@ with gr.Blocks() as demo:
     # Todo fix the gr.Slider even thought it says 10, more are appearing
     with gr.Tab("👀 View Stories"):
         gr.Markdown("### Recently Created Stories")
+        gr.Markdown("💡 **Tip:** Click on a Story ID to auto-fill the Update/Delete forms")
         limit = gr.Slider(1, 50, value=10, step=1, label="Number of Stories")
         fetch_btn = gr.Button("Fetch Stories")
         table = gr.Dataframe(
             headers=["ID", "Title", "Category", "Tags", "Mood", "Created At"],
             datatype=["str", "str", "str", "str", "str", "str"],
-            interactive=False,
+            interactive=True,
             wrap=True,
             value=fetch_stories(10),
         )
+        
+        # Copy and past to update or delete
+        gr.Markdown("### Step 1: Click an ID in the table above")
+        gr.Markdown("### Step 2: Choose where to send it")
+        with gr.Row():
+            send_to_update_btn = gr.Button("📝 Send to Update")
+            send_to_delete_btn = gr.Button("🗑️ Send to Delete")
+
+        selection_status = gr.Textbox(label="Status", interactive=False)
         fetch_btn.click(fetch_stories, inputs=[limit], outputs=[table])
         limit.change(lambda x: x, inputs=[limit], outputs=[limit_state])    
     
@@ -234,7 +254,6 @@ with gr.Blocks() as demo:
     ]
 )
     
-    
     update_btn.click(
         fn=change_story,
         inputs=[update_id, update_title, update_content, update_tags, update_category, update_mood],
@@ -246,5 +265,25 @@ with gr.Blocks() as demo:
     inputs=[delete_id],
     outputs=[delete_output, table]
     )  
+    
+    # copy to update and delet tab
+    # Event handlers:
+    table.select(
+    fn=get_selected_id,
+    outputs=[selected_id_state, selection_status]
+    )
+
+    send_to_update_btn.click(
+        fn=lambda id: (id, f"✅ Sent to Update form: {id}"),
+        inputs=[selected_id_state],
+        outputs=[update_id, selection_status]
+    )
+
+    send_to_delete_btn.click(
+        fn=lambda id: (id, f"✅ Sent to Delete form: {id}"),
+        inputs=[selected_id_state],
+        outputs=[delete_id, selection_status]
+    )
+
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=4103)
