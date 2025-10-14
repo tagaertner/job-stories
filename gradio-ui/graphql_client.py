@@ -34,12 +34,13 @@ def create_story(input_data):
         return {"error": f"❌ Failed to submit story: {e}"}
    
     
-def get_stories(limit=10, offset=0):
+def get_stories(limit=10, offset=0, from_date=None, to_date=None):
     query = """
-    query GetStories($limit: Int, $offset: Int) {
-        stories(limit: $limit, offset: $offset) {
+    query GetStories($filter: StoryFilter, $limit: Int, $offset: Int) {
+        stories(filter: $filter, limit: $limit, offset: $offset) {
             id
             title
+            content
             category
             mood
             tags
@@ -48,7 +49,17 @@ def get_stories(limit=10, offset=0):
     }
     """
     
-    variables = {"limit": limit, "offset": offset}
+    variables = {
+        "filter":{},
+        "limit": limit, 
+        "offset": offset
+        }
+    
+    
+    if from_date:
+        variables["filter"]["dateFrom"] = from_date
+    if to_date:
+        variables["filter"]["dateTo"] = to_date
         
     try:
         response = requests.post(
@@ -68,6 +79,37 @@ def get_stories(limit=10, offset=0):
 
     except Exception as e:
         return f"❌ Failed to fetch stories: {e}"
+    
+def get_story_by_id(story_id):
+    query = """
+    query GetStory($id: ID!) {
+        story(id: $id) {
+            id
+            title
+            content
+            category
+            mood
+            tags
+            createdAt
+        }
+    }
+    """
+    try:
+        response = requests.post(
+            GQL_ENDPOINT,
+            json={"query": query, "variables": {"id": story_id}},
+            headers={"Content-Type": "application/json"}
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        if "errors" in data:
+            return {"error": data["errors"][0]["message"]}
+        
+        return data.get("data", {}).get("story", {})
+    except Exception as e:
+        return {"error": str(e)}
+    
     
 # todo get_stories_by_id related to load storyies
 def update_story(input_data):
@@ -111,7 +153,7 @@ def delete_story(input_data):
     
     }
     """
-    
+
     try:
         response = requests.post(
             GQL_ENDPOINT,

@@ -1,6 +1,7 @@
 # gradio-ui/app.py
 import gradio as gr
-from graphql_client import create_story, get_stories, update_story, delete_story
+from datetime import datetime
+from graphql_client import create_story, get_stories, update_story, delete_story, get_story_by_id
 
 # TODO (JWT Integration Reminder):
 # ---------------------------------------------------------
@@ -48,10 +49,8 @@ def submit_story(title, content, tags_string, category, mood):
 
     return message, fetch_stories(10), "", "", "", "", ""
 
-def fetch_stories(limit):
-    print(f"🔍 DEBUG: fetch_stories called with limit={limit}")
-    stories = get_stories(limit)
-    print(f"🔍 DEBUG: get_stories returned {len(stories) if isinstance(stories, list) else 'error'}")
+def fetch_stories(limit, from_date=None, to_date=None):
+    stories = get_stories(limit, from_date=from_date, to_date=to_date)
     
     if isinstance(stories, str):
         return [[stories, "", "", "", "", ""]]
@@ -61,15 +60,27 @@ def fetch_stories(limit):
 
     table_data = []
     for s in stories:
+        created_raw = s.get("createdAt", "")
+        created_formatted = ""
+        if created_raw:
+            try:
+                created_formatted = datetime.fromisoformat(created_raw.replace("Z", "+00:00")).strftime("%m-%d-%Y")
+            except:
+                created_formatted = created_raw
+                
+        content_raw = s.get("content", "") or ""
+        content_preview = (content_raw[:80] + "…") if len(content_raw) > 100 else content_raw
+                   
         table_data.append([
             s.get("id", ""),
             s.get("title", ""),
+            content_preview,
             s.get("category", ""),
             ", ".join(s.get("tags", [])) if s.get("tags") else "",
             s.get("mood", ""),
-            s.get("createdAt", "")
+            created_formatted
         ])
-    print(f"🔍 DEBUG: Returning {len(table_data)} rows")
+        
     return table_data
 
 def change_story(story_id, title, content, tags_string, category, mood):
@@ -118,6 +129,20 @@ def get_selected_id(event_data: gr.SelectData):
     story_id = event_data.value
     return story_id, f"📋 Selected: {story_id}\n\n👉 Now click 'Send to Update' or 'Send to Delete'"
 
+def view_full_story(story_id):
+    if not story_id:
+        return "⚠️ Please click a Story ID in the table first, then try again."
+    
+    # Fetch just that story from GraphQL
+    from graphql_client import get_story_by_id  # 👈 you’ll add this function below
+    
+    story = get_story_by_id(story_id)
+    if not story or "error" in story:
+        return f"❌ Could not load story: {story.get('error', 'Unknown error')}"
+    
+    content = story.get("content", "(No content)")
+    return f"🧠 {story.get('title', '')}\n\n{content}"
+
 def remove_story(story_id):
     # Validate
     if not story_id:
@@ -139,13 +164,15 @@ def remove_story(story_id):
         return f"❌ Story not found or could not be deleted", fetch_stories(10)
 
 # ✅ Gradio Interface
+# todo Track usage history (e.g., how many logs created)
+
 with gr.Blocks() as demo:
     gr.Markdown("# 🧠 Job Stories Portal")
 
     limit_state = gr.State(value=10)
     selected_id_state = gr.State(value="")
-    
-    # --- Submit Story Tab ---
+
+    # --- 📝 Submit Story Tab ---
     with gr.Tab("📝 Submit Story"):
         title = gr.Textbox(label="Title")
         content = gr.Textbox(label="Content", lines=5)
@@ -167,18 +194,28 @@ with gr.Blocks() as demo:
         submit = gr.Button("Submit")
         output = gr.Textbox(label="Confirmation", lines=6)
 
-    # --- View Stories Tab ---
+    # --- 👀 View Stories Tab ---
+    # todo the from and to does not work... what does the fetch button do. wonder if the from and to issue is on bk
     with gr.Tab("👀 View Stories"):
         gr.Markdown("### Recently Created Stories")
         gr.Markdown("💡 **Tip:** Click on a Story ID to auto-fill the Update/Delete forms")
-        
-        gr.Markdown("### Step 1: Click an ID in the table above")
+
+        gr.Markdown("### Step 1: Click an ID in the table below")
         gr.Markdown("### Step 2: Choose where to send it")
+        gr.Markdown("### Step 3: View Full Story")
+        gr.Markdown("👉 Click a Story ID in the table below first, then click the button below to view full story.")
+
         with gr.Row():
             send_to_update_btn = gr.Button("📝 Send to Update", scale=1)
             send_to_delete_btn = gr.Button("🗑️ Send to Delete", scale=1)
-        selection_status = gr.Textbox(label="Status", interactive=False)
-        
+            selection_status = gr.Textbox(label="Status", interactive=False)
+
+        # 👇 Date range filters
+        with gr.Row():
+            from_date = gr.Textbox(label="From (MM-DD-YYYY)", placeholder="10-01-2025")
+            to_date = gr.Textbox(label="To (MM-DD-YYYY)", placeholder="10-13-2025")
+
+        # 👇 Pagination controls
         limit = gr.Number(
             value=10,
             minimum=1,
@@ -186,20 +223,31 @@ with gr.Blocks() as demo:
             step=1,
             label="Number of Stories"
         )
-        
+
         fetch_btn = gr.Button("Fetch Stories", scale=1)
+
+        # 👇 Stories table
         table = gr.Dataframe(
             headers=["ID", "Title", "Category", "Tags", "Mood", "Created At"],
             interactive=False,
             wrap=True,
-            value=fetch_stories(10),  # initial display
+            value=fetch_stories(10),
         )
 
-    # --- Update Story Tab ---
+        # 👁️ View full story section
+        gr.Markdown("### Step 3: View Full Story")
+        gr.Markdown("👉 Click a Story ID in the table above, then click the button below to view its full content.")
+
+        with gr.Row():
+            view_full_btn = gr.Button("👁️ View Full Story", scale=1)
+        full_story_box = gr.Textbox(label="Full Story Content", lines=10, interactive=False)
+
+    # --- 📝 Update Story Tab ---
+    # todo should be auto filled with the ID info
     with gr.Tab("📝 Update Story"):
         gr.Markdown("### Update Existing Story")
         gr.Markdown("💡 *Copy a Story ID from the View Stories tab*")
-        
+
         update_id = gr.Text(label="Story ID *", placeholder="e.g., 7b12c3df-8ebe-4d7a-aaa3-3d06ad40b576")
         update_title = gr.Text(label="New Title (optional)")
         update_content = gr.Textbox(label="New Content (optional)", lines=5)
@@ -218,15 +266,15 @@ with gr.Blocks() as demo:
                 "😓 stress", "😔 loneliness", "😳 embarrassment",
             ],
         )
-        
+
         update_btn = gr.Button("Update Story")
         update_output = gr.Textbox(label="Confirmation", lines=6)
-    
-    # --- Delete Story Tab ---
+
+    # --- 🗑️ Delete Story Tab ---
     with gr.Tab("🗑️ Delete Story"):
         gr.Markdown("### Delete Existing Story")
         gr.Markdown("⚠️ *This action cannot be undone!*")
-        
+
         delete_id = gr.Text(label="Story ID *", placeholder="e.g., 7b12c3df-8ebe-4d7a-aaa3-3d06ad40b576")
         delete_btn = gr.Button("Delete Story", variant="stop")
         delete_output = gr.Textbox(label="Confirmation", lines=6)
@@ -252,7 +300,14 @@ with gr.Blocks() as demo:
     
     fetch_btn.click(
         fn=fetch_stories,
-        inputs=[limit],
+        inputs=[limit,from_date, to_date],
+        outputs=[table]
+    )
+    
+    
+    limit.change(
+        fn=fetch_stories,
+        inputs=[limit, from_date, to_date],
         outputs=[table]
     )
     
@@ -273,6 +328,12 @@ with gr.Blocks() as demo:
         outputs=[delete_id, selection_status]
     )
     
+    view_full_btn.click(
+        fn=view_full_story, 
+        inputs=[selected_id_state],
+        outputs=[full_story_box]
+    )
+
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=4103)
