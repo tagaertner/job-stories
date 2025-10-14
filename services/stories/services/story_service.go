@@ -4,9 +4,11 @@ import (
 	"github.com/tagaertner/job-stories/services/stories/models"
 	"gorm.io/gorm"
 	"time"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/tagaertner/job-stories/services/stories/generated"
+	
 	"context"
 	"errors"
 )
@@ -103,6 +105,40 @@ func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string, page
 	return stories, int(total), nil
 }
 
+func (s *StoryService) GetStoriesByUserCursor(ctx context.Context, userID string, after *string, first int) ([]*models.JobStory, bool, error) {
+	var stories []*models.JobStory
+	
+	query := s.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		Order("created_at DESC, id DESC")
+	
+	// If we have a cursor, decode it and filter
+	if after != nil && *after != "" {
+		timestamp, id, err := DecodeCursor(*after)
+		if err != nil {
+			return nil, false, fmt.Errorf("invalid cursor: %w", err)
+		}
+		
+		// Filter for stories before this cursor
+		query = query.Where(
+			"(created_at < ?) OR (created_at = ? AND id < ?)",
+			timestamp, timestamp, id,
+		)
+	}
+	
+	// Fetch first + 1 to check if there's a next page
+	if err := query.Limit(first + 1).Find(&stories).Error; err != nil {
+		return nil, false, err
+	}
+	
+	// Check if there are more results
+	hasNextPage := len(stories) > first
+	if hasNextPage {
+		stories = stories[:first]
+	}
+	
+	return stories, hasNextPage, nil
+}
 
 
 func (s *StoryService) CreateStory(

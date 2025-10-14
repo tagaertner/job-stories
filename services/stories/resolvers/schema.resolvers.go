@@ -10,6 +10,7 @@ import (
 
 	"github.com/tagaertner/job-stories/services/stories/generated"
 	"github.com/tagaertner/job-stories/services/stories/models"
+	"github.com/tagaertner/job-stories/services/stories/services"
 )
 
 // CreateStory is the resolver for the createStory field.
@@ -44,11 +45,11 @@ func (r *mutationResolver) DeleteStory(ctx context.Context, input *models.Delete
 
 // Stories is the resolver for the stories field.
 func (r *queryResolver) Stories(ctx context.Context, filter *generated.StoryFilter, limit *int, offset *int) ([]*generated.JobStory, error) {
-	stories, err := r.StoryService.GetAllStories(filter, limit, offset)
+	allStories, err := r.StoryService.GetAllStories(filter, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	return ToGraphQLStoryList(stories), nil
+	return ToGraphQLStoryList(allStories), nil
 }
 
 // Story is the resolver for the story field.
@@ -61,8 +62,51 @@ func (r *queryResolver) Story(ctx context.Context, id string) (*generated.JobSto
 }
 
 // StoriesByUserCursor is the resolver for the storiesByUserCursor field.
+
 func (r *queryResolver) StoriesByUserCursor(ctx context.Context, userID string, after *string, first *int) (*generated.StoryConnection, error) {
-	panic(fmt.Errorf("not implemented: StoriesByUserCursor - storiesByUserCursor"))
+	// Set default first
+	defaultFirst := 10
+	f := defaultFirst
+	if first != nil{
+		f = *first
+	}
+
+	// Validate first
+	if f <= 0 || f > 100 {
+		return nil, fmt.Errorf("first must be between 1- 100")
+	}
+
+	// Get stories from service
+	stories, hasNextPage, err := r.StoryService.GetStoriesByUserCursor(ctx, userID, after,f)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build edges
+	edges := make([]*generated.StoryEdge, len(stories))
+	for i, story := range stories {
+		edges[i] = &generated.StoryEdge{
+			Cursor: services.EncodeCursor(story),
+			Node: ToGraphQLStory(story),
+		}
+	}
+
+	var endCursor *string
+	if len(edges) >0 {
+		cursor := edges[len(edges)-1].Cursor
+		endCursor = &cursor
+	}
+
+	// Build connection
+	connection := &generated.StoryConnection{
+		Edges: edges,
+		PageInfo: &generated.PageInfo{
+			HasNextPage: hasNextPage,
+			EndCursor: endCursor,
+		},
+		TotalCount: len(edges),
+	}
+	return connection, nil 
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -100,7 +144,12 @@ type queryResolver struct{ *Resolver }
 		TotalCount: total,
 		CurrentPage: p,
 		HasNextPage: (p *ps) < total,
-	},
+	}allStories, err := r.StoryService.GetAllStories(filter, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	
+	g,
 		nil
 	}
 */
