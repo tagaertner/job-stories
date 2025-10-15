@@ -21,25 +21,24 @@ func NewStoryService(db *gorm.DB) *StoryService {
 	return &StoryService{db: db}
 }
 
-func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, offset *int) ([]*models.JobStory, error)  {
+// GetAllStories returns filtered stories from DB
+func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, offset *int) ([]*models.JobStory, error) {
 	var stories []*models.JobStory
-	
-	// Set default values
+
+	// Default pagination
 	defaultLimit := 100
 	defaultOffset := 0
-	
-	if limit != nil{
+	if limit != nil {
 		defaultLimit = *limit
 	}
-	if offset != nil{
+	if offset != nil {
 		defaultOffset = *offset
-
 	}
 
-	// Start building query
-	query := s.db.Model((&models.JobStory{}))
+	// Start query
+	query := s.db.Model(&models.JobStory{})
 
-	// Apply filers
+	// Apply filters
 	if filter != nil {
 		if filter.Category != nil {
 			query = query.Where("category = ?", *filter.Category)
@@ -47,7 +46,7 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 		if filter.Mood != nil {
 			query = query.Where("mood = ?", *filter.Mood)
 		}
-		if filter.Tags != nil && len(filter.Tags) > 0 {
+		if len(filter.Tags) > 0 {
 			query = query.Where("tags && ?", pq.Array(filter.Tags))
 		}
 		if filter.SearchText != nil {
@@ -62,24 +61,18 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 		}
 	}
 
-	// Apply limit and offset to query
-	if err :=s.db.
-	Limit(defaultLimit).
-	Offset(defaultOffset).
-	Order("created_at DESC").
-	Find(&stories).Error; err != nil{
+	// Apply pagination + execute
+	if err := query.
+		Limit(defaultLimit).
+		Offset(defaultOffset).
+		Order("created_at DESC").
+		Find(&stories).Error; err != nil {
 		return nil, err
 	}
+
 	return stories, nil
 }
 
-func (s *StoryService) GetStoryByID(id string) (*models.JobStory, error) {
-	var story models.JobStory
-	if err := s.db.First(&story, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &story, nil
-}
 
 func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string, page int, pageSize int) ([]*models.JobStory, int, error) {
 	var stories []*models.JobStory
@@ -103,6 +96,14 @@ func (s *StoryService) GetStoriesByUser(ctx context.Context, userID string, page
 	}
 
 	return stories, int(total), nil
+}
+
+func (s *StoryService)GetStoryByID(ctx context.Context, id string)(*models.JobStory, error){
+	var story models.JobStory 
+	if err := s.db.First(&story, "id = ?", id).Error; err != nil{
+		return nil, err
+	}
+	return &story, nil
 }
 
 func (s *StoryService) GetStoriesByUserCursor(ctx context.Context, userID string, after *string, first int) ([]*models.JobStory, bool, error) {

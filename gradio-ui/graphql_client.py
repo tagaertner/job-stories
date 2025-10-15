@@ -34,7 +34,7 @@ def create_story(input_data):
         return {"error": f"❌ Failed to submit story: {e}"}
    
     
-def get_stories(limit=10, offset=0, from_date=None, to_date=None):
+def get_stories(limit=10, offset=0, from_date=None, to_date=None, search_text=None):
     query = """
     query GetStories($filter: StoryFilter, $limit: Int, $offset: Int) {
         stories(filter: $filter, limit: $limit, offset: $offset) {
@@ -52,7 +52,7 @@ def get_stories(limit=10, offset=0, from_date=None, to_date=None):
     variables = {
         "filter":{},
         "limit": limit, 
-        "offset": offset
+        "offset": offset,
         }
     
     
@@ -60,6 +60,8 @@ def get_stories(limit=10, offset=0, from_date=None, to_date=None):
         variables["filter"]["dateFrom"] = from_date
     if to_date:
         variables["filter"]["dateTo"] = to_date
+    if search_text:
+        variables["filter"]["searchText"] = search_text 
         
     try:
         response = requests.post(

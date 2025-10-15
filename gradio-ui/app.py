@@ -49,8 +49,8 @@ def submit_story(title, content, tags_string, category, mood):
 
     return message, fetch_stories(10), "", "", "", "", ""
 
-def fetch_stories(limit, from_date=None, to_date=None):
-    stories = get_stories(limit, from_date=from_date, to_date=to_date)
+def fetch_stories(limit, from_date=None, to_date=None, search_text=None):
+    stories = get_stories(limit, from_date=from_date, to_date=to_date, search_text=search_text)
     
     if isinstance(stories, str):
         return [[stories, "", "", "", "", ""]]
@@ -162,8 +162,8 @@ def remove_story(story_id):
         return f"✅ Story ID:{story_id} was deleted!", fetch_stories(10)
     else:
         return f"❌ Story not found or could not be deleted", fetch_stories(10)
-
-# ✅ Gradio Interface
+    
+# === ✅ Gradio Interface ===# 
 # todo Track usage history (e.g., how many logs created)
 
 with gr.Blocks() as demo:
@@ -193,8 +193,8 @@ with gr.Blocks() as demo:
 
         submit = gr.Button("Submit")
         output = gr.Textbox(label="Confirmation", lines=6)
-
-    # --- 👀 View Stories Tab ---
+        
+    # === 👀 View Stories Tab ===# 
     # todo the from and to does not work... what does the fetch button do. wonder if the from and to issue is on bk
     with gr.Tab("👀 View Stories"):
         gr.Markdown("### Recently Created Stories")
@@ -210,10 +210,13 @@ with gr.Blocks() as demo:
             send_to_delete_btn = gr.Button("🗑️ Send to Delete", scale=1)
             selection_status = gr.Textbox(label="Status", interactive=False)
 
+        # Todo fix not working when fetch 🛠️
         # 👇 Date range filters
         with gr.Row():
             from_date = gr.Textbox(label="From (MM-DD-YYYY)", placeholder="10-01-2025")
             to_date = gr.Textbox(label="To (MM-DD-YYYY)", placeholder="10-13-2025")
+            
+        search_box = gr.Textbox(label="Search Stories", placeholder="Search in title or content (e.g., backend, debugging)")
 
         # 👇 Pagination controls
         limit = gr.Number(
@@ -242,7 +245,7 @@ with gr.Blocks() as demo:
             view_full_btn = gr.Button("👁️ View Full Story", scale=1)
         full_story_box = gr.Textbox(label="Full Story Content", lines=10, interactive=False)
 
-    # --- 📝 Update Story Tab ---
+    # === 📝 Update Story Tab ===# 
     # todo should be auto filled with the ID info
     with gr.Tab("📝 Update Story"):
         gr.Markdown("### Update Existing Story")
@@ -300,14 +303,14 @@ with gr.Blocks() as demo:
     
     fetch_btn.click(
         fn=fetch_stories,
-        inputs=[limit,from_date, to_date],
+        inputs=[limit,from_date, to_date,search_box],
         outputs=[table]
     )
     
     
     limit.change(
         fn=fetch_stories,
-        inputs=[limit, from_date, to_date],
+        inputs=[limit, from_date, to_date, search_box],
         outputs=[table]
     )
     

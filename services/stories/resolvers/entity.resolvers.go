@@ -12,7 +12,7 @@ import (
 
 // FindJobStoryByID is the resolver for the findJobStoryByID field.
 func (r *entityResolver) FindJobStoryByID(ctx context.Context, id string) (*generated.JobStory, error) {
-	story, err := r.StoryService.GetStoryByID(id)
+	story, err := r.StoryService.GetStoryByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}

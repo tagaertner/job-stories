@@ -54,7 +54,7 @@ func (r *queryResolver) Stories(ctx context.Context, filter *generated.StoryFilt
 
 // Story is the resolver for the story field.
 func (r *queryResolver) Story(ctx context.Context, id string) (*generated.JobStory, error) {
-	story, err := r.StoryService.GetStoryByID(id)
+	story, err := r.StoryService.GetStoryByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
