@@ -16,5 +16,6 @@ EXPOSE 4103
 
 # Set environment variable to disable analytics/log spam
 ENV GRADIO_ANALYTICS_ENABLED="False"
+ENV PYTHONPATH=/app
 
-CMD ["python", "gradio-ui/app.py"]
+CMD ["python", "gradio_ui/app.py"]

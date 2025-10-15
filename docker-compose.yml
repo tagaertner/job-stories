@@ -78,34 +78,13 @@ services:
   gradio-ui:
     build:
       context: .
-      dockerfile: gradio-ui/Dockerfile
+      dockerfile: gradio_ui/Dockerfile
     ports:
       - "${PORT_GRADIO}:4103"
     depends_on:
       - gateway
     env_file:
       - .env
-
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "${PORT_ORDERS}:4003"
-  #   environment:
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PORT=${DB_PORT}
-  #     - POSTGRES_USER=${POSTGRES_USER}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #     - POSTGRES_DB=${POSTGRES_DB}
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:4103/graphql"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  #     start_period: 40s
 
   # 🤖AI Summary Service port 4104
 
@@ -119,8 +98,6 @@ services:
         condition: service_started
       stories:
         condition: service_started
-      # orders:
-      #   condition: service_started
     environment:
       - PGPASSWORD=${POSTGRES_PASSWORD}
     volumes:
@@ -145,8 +122,6 @@ services:
     ports:
       - "${PORT_GATEWAY}:4100"
     depends_on:
-      # orders:
-      #   condition: service_started
       users:
         condition: service_started
       stories:
