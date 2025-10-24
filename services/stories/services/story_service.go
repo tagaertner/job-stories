@@ -193,7 +193,7 @@ func (s *StoryService)UpdateStory(
 		return nil, err
 	}
 
-	// Return the updated user
+	// Return the updated story
 	if err := s.db.WithContext(ctx).First(&story, "id = ?", id).Error; err != nil{
 		return nil, err
 	}

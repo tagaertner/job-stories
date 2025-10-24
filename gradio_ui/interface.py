@@ -6,6 +6,7 @@ from .handlers import (
 
 
 # === ✅ Gradio Interface ===# 
+# todo add user sign in 
 # todo Track usage history (e.g., how many logs created)
 def build_interface():
     
