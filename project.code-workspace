@@ -1,0 +1,52 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root",
+      "path": "."
+    },
+    {
+      "name": "🚪 Gateway",
+      "path": "./gateway"
+    },
+    {
+      "name": "🎨 Gradio UI",
+      "path": "./gradio_ui"
+    },
+    {
+      "name": "🤖 AI",
+      "path": "./ai"
+    },
+    {
+      "name": "📝 Prompts",
+      "path": "./prompts"
+    },
+    {
+      "name": "🧪 Tests",
+      "path": "./tests"
+    },
+    {
+      "name": "🔧 Utils",
+      "path": "./utils"
+    },
+    {
+      "name": "👤 Users Service",
+      "path": "./services/users"
+    },
+    {
+      "name": "📖 Stories Service",
+      "path": "./services/stories"
+    },
+    {
+      "name": "🗄️ Database",
+      "path": "./database"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/__pycache__": true,
+      "**/venv": true,
+      "**/.git": true
+    }
+  }
+}
