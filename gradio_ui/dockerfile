@@ -9,7 +9,7 @@ COPY . .
 
 # Install dependencies (gradio + optional)
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir gradio==4.38.0 requests
+    pip install --no-cache-dir gradio==4.38.0 huggingface_hub==0.19.4 requests
 
 # Expose port for Gradio
 EXPOSE 4103
