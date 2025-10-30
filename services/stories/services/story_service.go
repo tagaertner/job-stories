@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"time"
 	"fmt"
+	"log"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/tagaertner/job-stories/services/stories/generated"
@@ -38,8 +39,10 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 	// Start query
 	query := s.db.Model(&models.JobStory{})
 
+	
 	// Apply filters
 	if filter != nil {
+		
 		if filter.Category != nil {
 			query = query.Where("category = ?", *filter.Category)
 		}
@@ -53,10 +56,12 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 			searchPattern := "%" + *filter.SearchText + "%"
 			query = query.Where("title ILIKE ? OR content ILIKE ?", searchPattern, searchPattern)
 		}
+
 		if filter.DateFrom != nil {
 			query = query.Where("created_at >= ?", *filter.DateFrom)
 		}
 		if filter.DateTo != nil {
+			log.Printf("The date is: %s\n", *filter.DateTo)
 			query = query.Where("created_at <= ?", *filter.DateTo)
 		}
 	}
@@ -224,6 +229,7 @@ func (s *StoryService)DeleteStory(
 	return true, nil
 }
 
+// todo track user history
 
 
 

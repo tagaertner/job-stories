@@ -15,6 +15,12 @@ type JobStory struct {
     Mood      *string         `json:"mood,omitempty"`
     CreatedAt time.Time       `json:"createdAt"`
     UpdatedAt time.Time       `json:"updatedAt"`
+    // AI-generated fields
+	AITags     pq.StringArray `gorm:"type:text[];column:ai_tags" json:"aiTags"`
+	AICategory *string        `gorm:"column:ai_category" json:"aiCategory,omitempty"`
+	AIMood     *float64       `gorm:"column:ai_mood" json:"aiMood,omitempty"`
+	AISkills   pq.StringArray `gorm:"type:text[];column:ai_skills" json:"aiSkills"`
+	AIInsights *string        `gorm:"column:ai_insights" json:"aiInsights,omitempty"`
 }
 type PaginatedStories struct {
 	Stories     []*JobStory `json:"stories"`
