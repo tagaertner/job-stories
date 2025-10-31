@@ -39,35 +39,8 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 	// Start query
 	query := s.db.Model(&models.JobStory{})
 	
-	// Apply filters
+	// filters
 	if filter != nil {
-	// 	// parse DateTo if provided and compute dateToPlusOne
-    // var dateToPlusOne time.Time
-    // if filter.DateTo != nil {
-    //     var dateTo time.Time
-    //     var err error
-
-    //     // Support multiple date formats
-    //     layouts := []string{
-    //         time.RFC3339,
-    //         "2006-01-02",  // e.g., 2025-10-31
-    //         "01/02/2006",  // e.g., 10/31/2025
-    //     }
-
-    //     for _, layout := range layouts {
-    //         dateTo, err = time.Parse(layout, *filter.DateTo)
-    //         if err == nil {
-    //             break
-    //         }
-    //     }
-
-    //     if err != nil {
-    //         return nil, fmt.Errorf("invalid DateTo format: %w", err)
-    //     }
-
-    //     dateToPlusOne = dateTo.AddDate(0, 0, 1)
-    // }
-
 		
 		if filter.Category != nil {
 			query = query.Where("category = ?", *filter.Category)
