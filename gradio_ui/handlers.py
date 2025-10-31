@@ -162,4 +162,3 @@ def remove_story(story_id):
     else:
         return f"❌ Story not found or could not be deleted", fetch_stories(10)
     
-# Todo add user handlers

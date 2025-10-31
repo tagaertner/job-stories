@@ -6,7 +6,6 @@ from .handlers import (
 
 
 # === ✅ Gradio Interface ===# 
-# todo add user sign in 
 # todo Track usage history (e.g., how many logs created)
 def build_interface():
     
@@ -54,15 +53,14 @@ def build_interface():
                 send_to_delete_btn = gr.Button("🗑️ Send to Delete", scale=1)
                 selection_status = gr.Textbox(label="Status", interactive=False)
 
-            # Todo fix not working when fetch 🛠️
-            # 👇 Date range filters
+            # Date range filters
             with gr.Row():
                 from_date = gr.Textbox(label="From (MM-DD-YYYY)", placeholder="10-01-2025")
                 to_date = gr.Textbox(label="To (MM-DD-YYYY)", placeholder="10-13-2025")
                 
             search_box = gr.Textbox(label="Search Stories", placeholder="Search in title or content (e.g., backend, debugging)")
 
-            # 👇 Pagination controls
+            # Pagination controls
             limit = gr.Number(
                 value=10,
                 minimum=1,
@@ -73,7 +71,7 @@ def build_interface():
 
             fetch_btn = gr.Button("Fetch Stories", scale=1)
 
-            # 👇 Stories table
+            # Stories table
             table = gr.Dataframe(
                 headers=["ID", "Title", "Category", "Tags", "Mood", "Created At"],
                 interactive=False,
@@ -90,7 +88,6 @@ def build_interface():
             full_story_box = gr.Textbox(label="Full Story Content", lines=10, interactive=False)
 
         # === 📝 Update Story Tab ===# 
-        # todo should be auto filled with the ID info
         with gr.Tab("📝 Update Story"):
             gr.Markdown("### Update Existing Story")
             gr.Markdown("💡 *Copy a Story ID from the View Stories tab*")

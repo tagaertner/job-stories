@@ -171,5 +171,3 @@ def delete_story(input_data):
     
     except Exception as e:
         return {"error": f"❌ Failed to delete story: {e}"}
-    
-# Todo add user api
