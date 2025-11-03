@@ -63,7 +63,7 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 		}
 		if filter.DateTo != nil {
 			log.Printf("The date is: %s\n", *filter.DateTo)
-			query = query.Where("created_at < (?::date + interval '1 day')", *filter.DateTo)
+			query = query.Where("created_at < ?", *filter.DateTo)
 		}
 	}
 
