@@ -108,15 +108,26 @@ func (r *queryResolver) StoriesByUserCursor(ctx context.Context, userID string, 
 	return connection, nil
 }
 
-// UsageStat is the resolver for the usageStat field.
+// Todo UsageStat is the resolver for the usageStat field.
 func (r *queryResolver) UsageStat(ctx context.Context, period string) ([]*generated.UsageStat, error) {
-	panic(fmt.Errorf("not implemented: UsageStat - usageStat"))
+	stats, err := r.StoryService.GetUsageStats(ctx, period)
+	if err != nil {
+		return nil, err
+	}
+	var gqlStats []*generated.UsageStat
+	for _, s := range stats {
+		gqlStats = append(gqlStats, &generated.UsageStat{
+			Label: s.Label,
+			Count: s.Count,
+		})
+	}
+	return gqlStats, nil
 }
 
-// Mutation returns generated.MutationResolver implementation.
+// Todo Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
-// Query returns generated.QueryResolver implementation.
+// Todo Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }

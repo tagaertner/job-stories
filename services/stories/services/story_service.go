@@ -243,7 +243,44 @@ func (s *StoryService)DeleteStory(
 }
 
 // todo track user history
+func (s *StoryService) TrackHistory(ctx context.Context, userID string, action string) error {
+    log := models.UserLog{
+        UserID: userID,
+        Action: action,
+    }
 
+    if err := s.db.WithContext(ctx).Create(&log).Error; err != nil{
+		return fmt.Errorf("failed to track user action: %w", err)
+	}
+	return nil
+}
 
+func (s *StoryService)GetUsageStats(ctx context.Context, period string)([]models.UsageStat, error){
+	var results []models.UsageStat
+	query := s.db.WithContext(ctx).Model(&models.UserLog{})
 
+	switch period {
+	case "day":
+		query = query.
+			Select("DATE(created_at) AS label, COUNT(*) AS count").
+			Group("DATE(created_at)").
+			Order("DATE(created_at)")
+	case "week":
+		query = query.
+			Select("TO_CHAR(DATE_TRUNC('week', created_at), 'MM-DD-YYYY) AS label, COUNT(*) AS count").
+			Group("DATE_TRUNC('week', created_at)").
+			Order("Date_TRUNC('week', created_at)")
+	case "month":
+		query = query.
+			Select("TO_CHAR(DATE_TRUC('month', created_at), 'MM-YYYY) AS label, COUNT(*) AS count").
+			Group("DATE_TRUNC('month', created_at)").
+			Order("DATE_TRUNC('month', created_at)")
+	default:
+		return nil, fmt.Errorf("unsupported period: %s", period)
+	}
 
+	if err := query.Scan(&results).Error; err != nil{
+		return nil, fmt.Errorf("failded to fetch usage stats: %w", err)
+	}
+	return results, nil 
+}

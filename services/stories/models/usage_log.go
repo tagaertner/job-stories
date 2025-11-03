@@ -9,3 +9,8 @@ type UserLog struct {
 	FiltersUsed string `gorm:"type:jsonb"`
     CreatedAt   time.Time `gorm:"autoCreateTime"`
 }
+
+type UsageStat struct{
+	Label string
+	Count int
+}
