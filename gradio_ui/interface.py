@@ -76,7 +76,7 @@ def build_interface():
                 headers=["ID", "Title", "Category", "Tags", "Mood", "Created At"],
                 interactive=False,
                 wrap=True,
-                value=fetch_stories(10),
+                value=[],
             )
 
             # 👁️ View full story section
@@ -178,5 +178,9 @@ def build_interface():
             outputs=[full_story_box]
         )
 
+        demo.load(
+            fn=lambda:fetch_stories(10),
+            outputs=[table]
+        )
 
     return demo 
