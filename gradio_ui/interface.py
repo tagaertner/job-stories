@@ -38,7 +38,6 @@ def build_interface():
             output = gr.Textbox(label="Confirmation", lines=6)
             
         # === 👀 View Stories Tab ===# 
-        # todo the from and to does not work... what does the fetch button do. wonder if the from and to issue is on bk
         with gr.Tab("👀 View Stories"):
             gr.Markdown("### Recently Created Stories")
             gr.Markdown("💡 **Tip:** Click on a Story ID to auto-fill the Update/Delete forms")
