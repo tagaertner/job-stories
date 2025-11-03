@@ -28,6 +28,11 @@ type PageInfo {
   endCursor: String
 }
 
+type UsageStat {
+  label: String!
+  count: Int!
+}
+
 input StoryFilter {
   tags: [String!]
   category: String
@@ -64,6 +69,7 @@ type Query {
   stories(filter: StoryFilter, limit: Int, offset: Int): [JobStory!]!
   story(id: ID!): JobStory
   storiesByUserCursor(userId: ID!, after: String, first: Int = 5): StoryConnection!
+  usageStat(period: String!): [UsageStat!]!
 }
 
 type Mutation {

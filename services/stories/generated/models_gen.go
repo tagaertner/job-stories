@@ -46,3 +46,8 @@ type StoryFilter struct {
 	DateTo     *string  `json:"dateTo,omitempty"`
 	SearchText *string  `json:"searchText,omitempty"`
 }
+
+type UsageStat struct {
+	Label string `json:"label"`
+	Count int    `json:"count"`
+}

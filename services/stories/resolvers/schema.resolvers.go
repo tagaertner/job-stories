@@ -108,6 +108,11 @@ func (r *queryResolver) StoriesByUserCursor(ctx context.Context, userID string, 
 	return connection, nil
 }
 
+// UsageStat is the resolver for the usageStat field.
+func (r *queryResolver) UsageStat(ctx context.Context, period string) ([]*generated.UsageStat, error) {
+	panic(fmt.Errorf("not implemented: UsageStat - usageStat"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

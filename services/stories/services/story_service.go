@@ -1,15 +1,17 @@
 package services
 
 import (
-	"github.com/tagaertner/job-stories/services/stories/models"
-	"gorm.io/gorm"
-	"time"
+	"encoding/json"
 	"fmt"
 	"log"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"github.com/tagaertner/job-stories/services/stories/generated"
-	
+	"github.com/tagaertner/job-stories/services/stories/models"
+	"gorm.io/gorm"
+
 	"context"
 	"errors"
 )
@@ -72,6 +74,18 @@ func (s *StoryService) GetAllStories(filter *generated.StoryFilter, limit *int, 
 		Order("created_at DESC").
 		Find(&stories).Error; err != nil {
 		return nil, err
+	}
+
+	// Record usage log
+	filtersJSON, _ := json.Marshal(filter)
+	logEntry :=models.UserLog{
+		UserID: "anonyous",
+		Action: "fetch_stories",
+		FiltersUsed: string(filtersJSON),
+	}
+	if err := s.db.Create(&logEntry).Error; err != nil{
+		log.Printf("⚠️ failed to record usage log: %v",err)
+
 	}
 
 	return stories, nil
