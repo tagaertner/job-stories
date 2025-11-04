@@ -1,0 +1,2 @@
+FROM baseImage
+# Todo one create dockerdo, add to docker-compose

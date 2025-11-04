@@ -86,7 +86,7 @@ services:
     env_file:
       - .env
 
-  # 🤖AI Summary Service port 4104
+  # 🤖AI Summary Service port 4104 
 
   # Seed runs after services create tables
   db-seed:
