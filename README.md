@@ -3,60 +3,75 @@
 ## Project Structure
 
 ```
-stack-track/
+├── README.md
+├── ai
+│   ├── __init__.py
+│   ├── categorization.py
+│   ├── dockerfile
+│   ├── insights_generator.py
+│   ├── sentiment_analysis.py
+│   ├── skill_detector.py
+│   ├── tag_generation.py
+│   └── vertex_client.py
+├── database
+│   ├── 01-seed-data
+│   ├── init
+│   └── seed-data
 ├── docker-compose.yml
+├── gateway
+│   ├── dockerfile
+│   ├── gateway.js
+│   ├── node_modules
+│   ├── package-lock.json
+│   └── package.json
+├── generated
+│   ├── federation.go
+│   └── generated.go
 ├── go.mod
 ├── go.sum
-├── gqlgen.yml # (if using Go gqlgen)
-├── .env # local environment variables
-├── .gitignore
-
-├── gateway/ # Apollo Federation gateway (Node.js)
-│ ├── gateway.js
-│ ├── dockerfile
-│ └── package.json
-
-├── models/ # Shared Go structs (optional)
-│ └── job_story.go
-
-├── pkg/ # Optional: common federation helpers, utilities
-│ └── federation.go
-
-├── generated/ # gqlgen output (Go)
-│ ├── generated.go
-│ └── resolver.go
-
-├── database/
-│ └── init/ # Seed files for Postgres
-│ ├── 01-schema.sql
-│ └── 02-seed-job-stories.sql
-
-├── services/
-│ ├── job-stories/ # Go microservice for job story CRUD
-│ │ ├── main.go
-│ │ ├── schema.graphql
-│ │ ├── resolvers/
-│ │ ├── models/
-│ │ ├── services/
-│ │ ├── database/
-│ │ └── dockerfile
-│
-│ ├── ai-summary/ # Python microservice for Vertex AI calls
-│ │ ├── main.py
-│ │ ├── vertex_ai_client.py
-│ │ ├── summarizer.py
-│ │ ├── Dockerfile
-│ │ └── requirements.txt
-│
-│ └── gradio-ui/ # Gradio app for user-facing UI
-│ ├── app.py
-│ ├── components/
-│ │ ├── story_input.py
-│ │ └── interview_practice.py
-│ ├── utils/
-│ │ └── formatters.py
-│ ├── Dockerfile
-│ └── requirements.txt
-
-└── README.md
+├── gqlgen.root.backup.yml
+├── gradio_ui
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── app.py
+│   ├── components
+│   ├── dockerfile
+│   ├── graphql_client.py
+│   ├── handlers.py
+│   ├── interface.py
+│   ├── requirements.txt
+│   ├── test_update.py
+│   └── utils
+├── models
+│   └── models_gen.go
+├── models_gen.go
+├── pkg
+│   └── federation
+├── project.code-workspace
+├── prompts
+│   ├── __init__.py
+│   ├── insights_prompts.py
+│   ├── sentiment_prompts.py
+│   ├── skill_prompts.py
+│   └── tags_prompts.py
+├── resolvers
+│   └── resolver.go
+├── services
+│   ├── stories
+│   └── users
+├── tests
+│   ├── test_categories.py
+│   ├── test_insights.py
+│   ├── test_sentiment.py
+│   ├── test_skills.py
+│   └── test_tags.py
+├── utils
+│   ├── __init__.py
+│   ├── cache.py
+│   └── text_processing.py
+└── venv
+    ├── bin
+    ├── include
+    ├── lib
+    └── pyvenv.cfg
 ```
