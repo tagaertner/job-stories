@@ -147,7 +147,6 @@ def update_story(input_data):
     except Exception as e:
         return {"error": f"❌ Failed to update story: {e}"}
 
-# todo delete
 def delete_story(input_data):
     mutation = """ 
     mutation DeleteStory($input: DeleteStoryInput!){
